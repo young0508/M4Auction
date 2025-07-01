@@ -6,8 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.auction.common.JDBCTemplate;
+
 public class BidDAO {
-	
+	public BidDAO() {this.conn = JDBCTemplate.getConnection();}
 	private Connection conn;
 	private PreparedStatement pstmt;
 	private ResultSet rs;

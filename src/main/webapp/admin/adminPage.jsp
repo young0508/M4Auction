@@ -117,16 +117,24 @@
 	                        <p>충전 요청 금액: ₩ <%= dfAmt.format(req.getAmount()) %></p>
 	                        <p>요청일: <%= req.getRequestDate() %></p>
 	                    </div>
-	                    <div class="actions">
-	                        <a class="approve-btn"
-	                           href="<%= request.getContextPath() %>/admin/chargeAction?reqId=<%= req.getReqId() %>&action=approve">
-	                            승인
-	                        </a>
-	                        <a class="reject-btn"
-	                           href="<%= request.getContextPath() %>/admin/chargeAction?reqId=<%= req.getReqId() %>&action=reject">
-	                            거부
-	                        </a>
+	                                        <div class="actions">
+							<%-- ================= 변경된 부분 시작 ================= --%>
+							<%-- '승인' 링크를 POST 방식 폼으로 변경 --%>
+							<form action="<%= request.getContextPath() %>/admin/chargeAction" method="post" style="display: inline;">
+								<input type="hidden" name="reqId" value="<%= req.getReqId() %>">
+								<input type="hidden" name="action" value="approve">
+								<button type="submit" class="approve-btn">승인</button>
+							</form>
+
+							<%-- '거부' 링크를 POST 방식 폼으로 변경 --%>
+							<form action="<%= request.getContextPath() %>/admin/chargeAction" method="post" style="display: inline;">
+								<input type="hidden" name="reqId" value="<%= req.getReqId() %>">
+								<input type="hidden" name="action" value="reject">
+								<button type="submit" class="reject-btn">거부</button>
+							</form>
+							<%-- ================= 변경된 부분 끝 ================= --%>
 	                    </div>
+
 	                </div>
 	            <% } %>
 	        <% } %>

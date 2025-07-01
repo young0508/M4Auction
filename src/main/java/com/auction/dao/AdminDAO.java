@@ -108,7 +108,7 @@ public class AdminDAO {
                 long amount = rs.getLong("AMOUNT");
 
                 // 2. 마일리지 업데이트
-                String sql2 = "UPDATE MEMBER SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
+                String sql2 = "UPDATE USERS SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
                 pstmt2 = conn.prepareStatement(sql2);
                 pstmt2.setLong(1, amount);
                 pstmt2.setString(2, memberId);
@@ -159,16 +159,19 @@ public class AdminDAO {
 
     public int approveCharge(Connection conn, int reqId) {
         int result = 0;
-        try (PreparedStatement ps1 = conn.prepareStatement(
-                 "SELECT MEMBER_ID, AMOUNT FROM CHARGE_REQUEST WHERE REQ_ID = ? AND STATUS = 'W'");
-             PreparedStatement ps2 = conn.prepareStatement(
-                 "UPDATE USERS SET MILEAGE = MILEAGE + ? WHERE \"MEMBER ID\" = ?");
-             PreparedStatement ps3 = conn.prepareStatement(
-                 "UPDATE CHARGE_REQUEST SET STATUS = 'A', APPROVE_DATE = SYSDATE WHERE REQ_ID = ?")) {
-            
+        String sql1 = "SELECT MEMBER_ID, AMOUNT FROM CHARGE_REQUEST WHERE REQ_ID = ? AND STATUS = 'W'";
+        String sql2 = "UPDATE USERS SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
+        String sql3 = "UPDATE CHARGE_REQUEST SET STATUS = 'A', APPROVE_DATE = SYSDATE WHERE REQ_ID = ?";
+
+        try (
+            PreparedStatement ps1 = conn.prepareStatement(sql1);
+            PreparedStatement ps2 = conn.prepareStatement(sql2);
+            PreparedStatement ps3 = conn.prepareStatement(sql3);
+        ) {
             ps1.setInt(1, reqId);
             ResultSet rs = ps1.executeQuery();
-            if(rs.next()) {
+
+            if (rs.next()) {
                 String memberId = rs.getString("MEMBER_ID");
                 long amount = rs.getLong("AMOUNT");
 
@@ -179,9 +182,9 @@ public class AdminDAO {
                 ps3.setInt(1, reqId);
                 int r2 = ps3.executeUpdate();
 
-                result = r1 * r2; // 둘 다 성공해야 1
+                result = (r1 > 0 && r2 > 0) ? 1 : 0;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
