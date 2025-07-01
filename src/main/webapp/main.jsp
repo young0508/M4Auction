@@ -36,7 +36,7 @@
       <div class="overlay position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.5);"></div>
       <div class="position-relative d-flex justify-content-center align-items-center h-100 flex-column">
         <h1 class="display-4 fw-bold">M4 Auction에 오신 것을 환영합니다</h1>
-        <p class="lead">세상의 모든 명품, 골동품, 자동차를 경매로 즐겨보세요.</p>
+        <p class="lead">세상의 모든 명품, 골동품, 클래식/슈퍼카를 경매로 즐겨보세요.</p>
         <a href="<%=ctx%>/exhibitions.jsp" class="btn btn-warning btn-lg mt-3">경매 둘러보기</a>
       </div>
     </section>
@@ -60,7 +60,7 @@
           <div class="card shadow-sm h-100">
             <img src="<%=ctx%>/resources/images/car.jpg" class="card-img-top" alt="자동차">
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title">자동차</h5>
+              <h5 class="card-title">클래식/슈퍼카</h5>
               <p class="card-text flex-grow-1">희소한 클래식카부터 최신 슈퍼카까지 경매 진행 중입니다.</p>
               <a href="<%=ctx%>/news/society/societyList.jsp" class="btn btn-outline-primary mt-auto">자세히 보기</a>
             </div>

@@ -20,7 +20,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <link rel="stylesheet" href="<%=ctx%>/views/style.css">
-  <link rel="stylesheet" href="<%=request.getContextPath()%>/views/style.css">
+  
   
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   
