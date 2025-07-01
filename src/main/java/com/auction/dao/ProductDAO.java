@@ -199,7 +199,7 @@ public class ProductDAO {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         String sql = "SELECT COUNT(*) AS COUNT\r\n"
-        		+ "FROM PRODUCT\r\n"
+        		+ "FROM PRODUCT \r\n"
         		+ "WHERE STATUS = 'A'";
         try {
             pstmt = conn.prepareStatement(sql);

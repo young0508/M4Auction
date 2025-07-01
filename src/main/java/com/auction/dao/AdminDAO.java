@@ -1,5 +1,6 @@
 package com.auction.dao;
 
+import com.auction.vo.ChargeRequestDTO;
 import com.auction.vo.ProductDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -88,5 +89,113 @@ public class AdminDAO {
             }
         }
         return list;
+    }
+    public int approveMileage(Connection conn, int reqId) {
+        int result = 0;
+        PreparedStatement pstmt1 = null;
+        PreparedStatement pstmt2 = null;
+        ResultSet rs = null;
+
+        try {
+            // 1. 충전 요청 정보 조회
+            String sql1 = "SELECT MEMBER_ID, AMOUNT FROM CHARGE_REQUEST WHERE REQ_ID = ?";
+            pstmt1 = conn.prepareStatement(sql1);
+            pstmt1.setInt(1, reqId);
+            rs = pstmt1.executeQuery();
+
+            if(rs.next()) {
+                String memberId = rs.getString("MEMBER_ID");
+                long amount = rs.getLong("AMOUNT");
+
+                // 2. 마일리지 업데이트
+                String sql2 = "UPDATE MEMBER SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
+                pstmt2 = conn.prepareStatement(sql2);
+                pstmt2.setLong(1, amount);
+                pstmt2.setString(2, memberId);
+                int updateResult = pstmt2.executeUpdate();
+
+                // 3. 승인 처리
+                if(updateResult > 0) {
+                    String sql3 = "UPDATE CHARGE_REQUEST SET STATUS = '승인', APPROVE_DATE = SYSDATE WHERE REQ_ID = ?";
+                    PreparedStatement pstmt3 = conn.prepareStatement(sql3);
+                    pstmt3.setInt(1, reqId);
+                    result = pstmt3.executeUpdate();
+                    pstmt3.close();
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(rs);
+            close(pstmt1);
+            close(pstmt2);
+        }
+
+        return result;
+    }
+    public List<ChargeRequestDTO> getAllChargeRequests(Connection conn) {
+        List<ChargeRequestDTO> list = new ArrayList<>();
+        String sql = "SELECT * FROM CHARGE_REQUEST ORDER BY REQUEST_DATE DESC";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                ChargeRequestDTO dto = new ChargeRequestDTO();
+                dto.setReqId(rs.getInt("REQ_ID"));
+                dto.setMemberId(rs.getString("MEMBER_ID"));
+                dto.setAmount(rs.getLong("AMOUNT"));
+                dto.setStatus(rs.getString("STATUS"));
+                dto.setRequestDate(rs.getDate("REQUEST_DATE"));
+                dto.setApproveDate(rs.getDate("APPROVE_DATE"));
+                list.add(dto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    public int approveCharge(Connection conn, int reqId) {
+        int result = 0;
+        try (PreparedStatement ps1 = conn.prepareStatement(
+                 "SELECT MEMBER_ID, AMOUNT FROM CHARGE_REQUEST WHERE REQ_ID = ? AND STATUS = 'W'");
+             PreparedStatement ps2 = conn.prepareStatement(
+                 "UPDATE USERS SET MILEAGE = MILEAGE + ? WHERE \"MEMBER ID\" = ?");
+             PreparedStatement ps3 = conn.prepareStatement(
+                 "UPDATE CHARGE_REQUEST SET STATUS = 'A', APPROVE_DATE = SYSDATE WHERE REQ_ID = ?")) {
+            
+            ps1.setInt(1, reqId);
+            ResultSet rs = ps1.executeQuery();
+            if(rs.next()) {
+                String memberId = rs.getString("MEMBER_ID");
+                long amount = rs.getLong("AMOUNT");
+
+                ps2.setLong(1, amount);
+                ps2.setString(2, memberId);
+                int r1 = ps2.executeUpdate();
+
+                ps3.setInt(1, reqId);
+                int r2 = ps3.executeUpdate();
+
+                result = r1 * r2; // 둘 다 성공해야 1
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public int rejectCharge(Connection conn, int reqId) {
+        int result = 0;
+        String sql = "UPDATE CHARGE_REQUEST SET STATUS = 'R', APPROVE_DATE = SYSDATE WHERE REQ_ID = ? AND STATUS = 'W'";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, reqId);
+            result = pstmt.executeUpdate();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }

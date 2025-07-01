@@ -2,6 +2,7 @@
 <%-- 역할: 관리자페이지 (순수 스크립틀릿 버전) --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
+<%@ page import="com.auction.vo.ChargeRequestDTO" %>
 <%@ page import="com.auction.vo.MemberDTO" %>
 <%@ page import="com.auction.vo.ProductDTO" %>
 <%@ page import="com.auction.dao.AdminDAO" %>
@@ -34,6 +35,7 @@
 
     // 3-2) 승인 대기 상품 목록
     List<ProductDTO> pendingList = aDao.selectPendingProductsList(conn);
+    List<ChargeRequestDTO> chargeList = aDao.getAllChargeRequests(conn);
 
     close(conn);
 
@@ -101,6 +103,35 @@
             <% } %>
         </div>
     </section>
+   <section class="pending-section">
+	    <h3>마일리지 충전 요청 대기 목록</h3>
+	    <div class="product-list">
+	        <%-- 충전 대기 요청이 없을 경우 --%>
+	        <% if (chargeList == null || chargeList.isEmpty()) { %>
+	            <p>현재 충전 대기 요청이 없습니다.</p>
+	        <% } else { %>
+	            <% for (ChargeRequestDTO req : chargeList) { %>
+	                <div class="product-card">
+	                    <div class="info">
+	                        <h4>회원 ID: <%= req.getMemberId() %></h4>
+	                        <p>충전 요청 금액: ₩ <%= dfAmt.format(req.getAmount()) %></p>
+	                        <p>요청일: <%= req.getRequestDate() %></p>
+	                    </div>
+	                    <div class="actions">
+	                        <a class="approve-btn"
+	                           href="<%= request.getContextPath() %>/admin/chargeAction?reqId=<%= req.getReqId() %>&action=approve">
+	                            승인
+	                        </a>
+	                        <a class="reject-btn"
+	                           href="<%= request.getContextPath() %>/admin/chargeAction?reqId=<%= req.getReqId() %>&action=reject">
+	                            거부
+	                        </a>
+	                    </div>
+	                </div>
+	            <% } %>
+	        <% } %>
+	    </div>
+	</section>
 
     <footer class="footer">
         <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
