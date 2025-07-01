@@ -4,29 +4,28 @@ import java.util.Date;
 
 public class BidDTO {
 	private int bidId;          // 입찰 고유 번호
-	private int itemId;         // 입찰한 상품 번호
-	private String bidderId;    // 입찰자 아이디
+	private int PRODUCT_ID;         // 입찰한 상품 번호
+	private String member_id;    // 입찰자 아이디
 	private int bidPrice;       // 입찰 가격
 	private Date bidTime;       // 입찰 시간
 	private int isSuccessful;   // 낙찰 여부 (0: 실패, 1: 낙찰)
-
 	public int getBidId() {
 		return bidId;
 	}
 	public void setBidId(int bidId) {
 		this.bidId = bidId;
 	}
-	public int getItemId() {
-		return itemId;
+	public int getPRODUCT_ID() {
+		return PRODUCT_ID;
 	}
-	public void setItemId(int itemId) {
-		this.itemId = itemId;
+	public void setPRODUCT_ID(int pRODUCT_ID) {
+		PRODUCT_ID = pRODUCT_ID;
 	}
-	public String getBidderId() {
-		return bidderId;
+	public String getMember_id() {
+		return member_id;
 	}
-	public void setBidderId(String bidderId) {
-		this.bidderId = bidderId;
+	public void setMember_id(String member_id) {
+		this.member_id = member_id;
 	}
 	public int getBidPrice() {
 		return bidPrice;
@@ -46,4 +45,5 @@ public class BidDTO {
 	public void setIsSuccessful(int isSuccessful) {
 		this.isSuccessful = isSuccessful;
 	}
+
 }

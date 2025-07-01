@@ -41,7 +41,7 @@
     if(winner != null) { // 3. 입찰자가 있는 경우 (정상적인 낙찰 처리)
         
         // 3-1. PRODUCT 테이블에 최종 낙찰자, 최종 낙찰가 정보 업데이트
-        int result1 = pDao.updateProductWinner(conn, productId, winner.getBidderId(), winner.getBidPrice());
+        int result1 = pDao.updateProductWinner(conn, productId, winner.getMemberId(), winner.getBidPrice());
         
         // 3-2. PRODUCT 테이블의 상태를 'E'(End)로 변경
         int result2 = pDao.updateProductStatus(conn, productId, "E");
