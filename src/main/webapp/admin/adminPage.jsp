@@ -110,34 +110,32 @@
 	        <% if (chargeList == null || chargeList.isEmpty()) { %>
 	            <p>현재 충전 대기 요청이 없습니다.</p>
 	        <% } else { %>
-	            <% for (ChargeRequestDTO req : chargeList) { %>
-	                <div class="product-card">
-	                    <div class="info">
-	                        <h4>회원 ID: <%= req.getMemberId() %></h4>
-	                        <p>충전 요청 금액: ₩ <%= dfAmt.format(req.getAmount()) %></p>
-	                        <p>요청일: <%= req.getRequestDate() %></p>
-	                    </div>
-	                                        <div class="actions">
-							<%-- ================= 변경된 부분 시작 ================= --%>
-							<%-- '승인' 링크를 POST 방식 폼으로 변경 --%>
-							<form action="<%= request.getContextPath() %>/admin/chargeAction" method="post" style="display: inline;">
-								<input type="hidden" name="reqId" value="<%= req.getReqId() %>">
-								<input type="hidden" name="action" value="approve">
-								<button type="submit" class="approve-btn">승인</button>
-							</form>
+			<% for (ChargeRequestDTO req : chargeList) {
+			     if ("W".equals(req.getStatus())) { %>   <%-- STATUS가 'W'인 경우만 출력 --%>
+			
+			    <div class="product-card">
+			        <div class="info">
+			            <h4>회원 ID: <%= req.getMemberId() %></h4>
+			            <p>충전 요청 금액: ₩ <%= dfAmt.format(req.getAmount()) %></p>
+			            <p>요청일: <%= req.getRequestDate() %></p>
+			        </div>
+			        <div class="actions">
+			            <form action="<%= request.getContextPath() %>/admin/chargeAction" method="post">
+			                <input type="hidden" name="reqId" value="<%= req.getReqId() %>">
+			                <input type="hidden" name="action" value="approve">
+			                <button type="submit">승인</button>
+			            </form>
+			
+			            <form action="<%= request.getContextPath() %>/admin/chargeAction" method="post" style="display: inline;">
+			                <input type="hidden" name="reqId" value="<%= req.getReqId() %>">
+			                <input type="hidden" name="action" value="reject">
+			                <button type="submit" class="reject-btn">거부</button>
+			            </form>
+			        </div>
+    				</div>
 
-							<%-- '거부' 링크를 POST 방식 폼으로 변경 --%>
-							<form action="<%= request.getContextPath() %>/admin/chargeAction" method="post" style="display: inline;">
-								<input type="hidden" name="reqId" value="<%= req.getReqId() %>">
-								<input type="hidden" name="action" value="reject">
-								<button type="submit" class="reject-btn">거부</button>
-							</form>
-							<%-- ================= 변경된 부분 끝 ================= --%>
-	                    </div>
-
-	                </div>
 	            <% } %>
-	        <% } %>
+	        <% }} %>
 	    </div>
 	</section>
 

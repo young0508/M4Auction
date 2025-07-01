@@ -20,7 +20,7 @@
     PreparedStatement pstmt = null;
 
     try {
-        String sql = "INSERT INTO CHARGE_REQUEST (REQ_ID, MEMBER_ID, AMOUNT) VALUES (CHARGE_REQUEST_SEQ.NEXTVAL, ?, ?)";
+    	String sql = "INSERT INTO CHARGE_REQUEST (REQ_ID, MEMBER_ID, AMOUNT, STATUS) VALUES (CHARGE_REQUEST_SEQ.NEXTVAL, ?, ?, 'W')";
         pstmt = conn.prepareStatement(sql);
         pstmt.setString(1, loginUser.getMemberId());
         pstmt.setLong(2, amount);

@@ -19,38 +19,50 @@ public class MemberDAO {
 
 	public MemberDAO() {}
 	
-	  public MemberDTO loginMember(Connection conn, String userId, String userPwd) {
-	        MemberDTO loginUser = null;
-	        PreparedStatement pstmt = null;
-	        ResultSet rs = null;
-	        String sql = "SELECT * FROM USERS \r\n WHERE MEMBER_ID = ? AND MEMBER_PWD = ?";
-
-	        try {
-	            pstmt = conn.prepareStatement(sql);
-	            pstmt.setString(1, userId);
-	            pstmt.setString(2, userPwd);
-	            rs = pstmt.executeQuery();
-
-	            if (rs.next()) {
-	                loginUser = new MemberDTO();
-	                loginUser.setMemberId(rs.getString("MEMBER_ID"));
-	                loginUser.setMemberName(rs.getString("MEMBER_NAME"));
-	                loginUser.setEmail(rs.getString("EMAIL"));
-	                loginUser.setTel(rs.getString("TEL"));
-	                loginUser.setEnrollDate(rs.getDate("ENROLL_DATE"));
-	                loginUser.setBirthdate(rs.getString("BIRTHDATE"));
-	                loginUser.setGender(rs.getString("GENDER"));
-	                loginUser.setMobileCarrier(rs.getString("MOBILE_CARRIER"));
-	                loginUser.setMileage(rs.getInt("MILEAGE"));
+	public MemberDTO loginMember(Connection conn, String memberId, String memberPwd) {
+	    MemberDTO member = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    
+	    try {
+	        String sql = "SELECT MEMBER_ID, MEMBER_NAME, EMAIL, MILEAGE FROM USERS WHERE MEMBER_ID = ? AND MEMBER_PWD = ?";
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setString(1, memberId);
+	        pstmt.setString(2, memberPwd);
+	        
+	        rs = pstmt.executeQuery();
+	        
+	        if (rs.next()) {
+	            member = new MemberDTO();
+	            member.setMemberId(rs.getString("MEMBER_ID"));
+	            member.setMemberName(rs.getString("MEMBER_NAME"));
+	            member.setEmail(rs.getString("EMAIL"));
+	            
+	            // ★ 중요: getInt() 대신 getLong() 사용
+	            // 44번째 줄 근처에서 오류가 발생하는 부분
+	            try {
+	                // 기존 코드 (오류 발생)
+	                // member.setMileage(rs.getInt("MILEAGE")); 
+	                
+	                // 수정된 코드 (오버플로우 방지)
+	                member.setMileage(rs.getLong("MILEAGE"));
+	                
+	            } catch (SQLException e) {
+	                System.out.println("마일리지 값 오버플로우 발생: " + e.getMessage());
+	                // 오버플로우 발생 시 0으로 설정하거나 다른 처리
+	                member.setMileage(0L);
 	            }
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        } finally {
-	            close(rs);
-	            close(pstmt);
 	        }
-	        return loginUser;
+	        
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        close(rs);
+	        close(pstmt);
 	    }
+	    
+	    return member;
+	}
 
     /**
      * 회원가입 기능 (상세 정보 버전) - 최종 수정됨

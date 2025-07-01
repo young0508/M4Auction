@@ -15,7 +15,7 @@ public class MemberDTO {
     private String birthdate;
     private String gender;
     private String mobileCarrier;
-    private int mileage; // 마일리지
+    private Long mileage; // 마일리지
 
     public MemberDTO() {}
 
@@ -54,6 +54,6 @@ public class MemberDTO {
     public void setMobileCarrier(String mobileCarrier) { this.mobileCarrier = mobileCarrier; }
     
     // ======== 새로 추가된 마일리지 Getter/Setter ========
-    public int getMileage() { return mileage; }
-    public void setMileage(int mileage) { this.mileage = mileage; }
+    public long getMileage() {return mileage;}
+    public void setMileage(long mileage) {this.mileage = mileage;}
 }

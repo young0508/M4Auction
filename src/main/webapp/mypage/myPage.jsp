@@ -36,7 +36,7 @@
     
     close(conn);
 
-    DecimalFormat df = new DecimalFormat("###,###,###");
+    DecimalFormat df = new DecimalFormat("###,###,###,###");
 %>
 <!DOCTYPE html>
 <html>

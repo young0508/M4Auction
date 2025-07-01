@@ -102,7 +102,7 @@ public class AdminDAO {
             pstmt1 = conn.prepareStatement(sql1);
             pstmt1.setInt(1, reqId);
             rs = pstmt1.executeQuery();
-
+            
             if(rs.next()) {
                 String memberId = rs.getString("MEMBER_ID");
                 long amount = rs.getLong("AMOUNT");
@@ -159,34 +159,44 @@ public class AdminDAO {
 
     public int approveCharge(Connection conn, int reqId) {
         int result = 0;
-        String sql1 = "SELECT MEMBER_ID, AMOUNT FROM CHARGE_REQUEST WHERE REQ_ID = ? AND STATUS = 'W'";
-        String sql2 = "UPDATE USERS SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
-        String sql3 = "UPDATE CHARGE_REQUEST SET STATUS = 'A', APPROVE_DATE = SYSDATE WHERE REQ_ID = ?";
+        PreparedStatement pstmt1 = null;
+        PreparedStatement pstmt2 = null;
+        PreparedStatement pstmt3 = null;
+        ResultSet rs = null;
 
-        try (
-            PreparedStatement ps1 = conn.prepareStatement(sql1);
-            PreparedStatement ps2 = conn.prepareStatement(sql2);
-            PreparedStatement ps3 = conn.prepareStatement(sql3);
-        ) {
-            ps1.setInt(1, reqId);
-            ResultSet rs = ps1.executeQuery();
+        try {
+            // ✅ 여기 정확히 수정
+            String sql1 = "SELECT MEMBER_ID, AMOUNT FROM CHARGE_REQUEST WHERE REQ_ID = ? AND STATUS = 'W'";
+            pstmt1 = conn.prepareStatement(sql1);
+            pstmt1.setInt(1, reqId);
+            rs = pstmt1.executeQuery();
 
             if (rs.next()) {
                 String memberId = rs.getString("MEMBER_ID");
-                long amount = rs.getLong("AMOUNT");
+                int amount = rs.getInt("AMOUNT");
 
-                ps2.setLong(1, amount);
-                ps2.setString(2, memberId);
-                int r1 = ps2.executeUpdate();
-
-                ps3.setInt(1, reqId);
-                int r2 = ps3.executeUpdate();
+                String sql2 = "UPDATE USERS SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
+                pstmt2 = conn.prepareStatement(sql2);
+                pstmt2.setLong(1, amount);
+                pstmt2.setString(2, memberId);
+                int r1 = pstmt2.executeUpdate();
+                System.out.println("▶ USERS 마일리지 업데이트: memberId = " + memberId + ", amount = " + amount);
+                String sql3 = "UPDATE CHARGE_REQUEST SET STATUS = 'A', APPROVE_DATE = SYSDATE WHERE REQ_ID = ?";
+                pstmt3 = conn.prepareStatement(sql3);
+                pstmt3.setInt(1, reqId);
+                int r2 = pstmt3.executeUpdate();
 
                 result = (r1 > 0 && r2 > 0) ? 1 : 0;
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            close(rs);
+            close(pstmt1);
+            close(pstmt2);
+            close(pstmt3);
         }
+
         return result;
     }
 
