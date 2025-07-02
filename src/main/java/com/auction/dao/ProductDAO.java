@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+<<<<<<< HEAD
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,6 +26,10 @@ import javax.servlet.http.HttpSession;
 import com.auction.common.PageInfo;
 import com.auction.vo.Bid;
 import com.auction.vo.MemberDTO;
+=======
+import com.auction.common.PageInfo;
+import com.auction.vo.BidDTO;
+>>>>>>> origin/dev
 import com.auction.vo.ProductDTO;
 
 public class ProductDAO {
@@ -417,7 +422,8 @@ public class ProductDAO {
     }
 
     public Bid findWinner(Connection conn, int productId) {
-        Bid winner = null;
+    public BidDTO findWinner(Connection conn, int productId) {
+        BidDTO winner = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         String sql = "SELECT *\r\n"
@@ -435,7 +441,7 @@ public class ProductDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                winner = new Bid();
+                winner = new BidDTO();
                 winner.setMemberId(rs.getString("MEMBER_ID"));
                 winner.setBidPrice(rs.getInt("BID_PRICE"));
             }
@@ -520,7 +526,6 @@ public class ProductDAO {
         }
         return list;
     }
-
     @WebServlet("/product/bid")
     public class BidServlet extends HttpServlet {
         protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

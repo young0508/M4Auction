@@ -83,4 +83,3 @@ if (bidPrice > loginUser.getMileage()) {
 }
 close(conn);
 %>
-
