@@ -15,8 +15,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import com.auction.common.PageInfo;
 import com.auction.vo.Bid;
+import com.auction.vo.MemberDTO;
 import com.auction.vo.ProductDTO;
 
 public class ProductDAO {
@@ -285,18 +293,25 @@ public class ProductDAO {
     public int insertBid(Connection conn, Bid b) {
         int result = 0;
         PreparedStatement pstmt = null;
-        String sql = "INSERT INTO BID (BID_ID, PRODUCT_ID, BIDDER_ID, BID_PRICE, BID_TIME)\r\n"
-        		+ "		VALUES (SEQ_BID_ID.NEXTVAL, ?, ?, ?, SYSDATE)";
+        String sql = "INSERT INTO BID (BID_ID, PRODUCT_ID, BIDDER_ID, BID_PRICE, BID_TIME) VALUES (SEQ_BID_ID.NEXTVAL, ?, ?, ?, SYSDATE)";
+
         try {
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, b.getProductId());
-            pstmt.setString(2, b.getBidderId());
+            pstmt.setString(2, b.getMemberId());
             pstmt.setInt(3, b.getBidPrice());
             result = pstmt.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); } 
-        finally { close(pstmt); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close(pstmt);
+        }
         return result;
     }
+
+
+
+
     
     public int updateCurrentPrice(Connection conn, int productId, int bidPrice) {
         int result = 0;
@@ -421,7 +436,7 @@ public class ProductDAO {
 
             if (rs.next()) {
                 winner = new Bid();
-                winner.setBidderId(rs.getString("BIDDER_ID"));
+                winner.setMemberId(rs.getString("MEMBER_ID"));
                 winner.setBidPrice(rs.getInt("BID_PRICE"));
             }
         } catch (SQLException e) {
@@ -505,4 +520,52 @@ public class ProductDAO {
         }
         return list;
     }
+
+    @WebServlet("/product/bid")
+    public class BidServlet extends HttpServlet {
+        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+            request.setCharacterEncoding("UTF-8");
+            HttpSession session = request.getSession();
+            MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
+
+            if (loginUser == null) {
+                response.sendRedirect(request.getContextPath() + "/member/loginForm.jsp");
+                return;
+            }
+
+            int productId = Integer.parseInt(request.getParameter("productId"));
+            int bidPrice = Integer.parseInt(request.getParameter("bidPrice"));
+
+            Connection conn = getConnection();
+            ProductDAO dao = new ProductDAO();
+            int currentPrice = dao.selectProductById(conn, productId).getCurrentPrice();
+
+            if (bidPrice <= currentPrice) {
+                session.setAttribute("alertMsg", "입찰가는 현재가보다 높아야 합니다.");
+                close(conn);
+                response.sendRedirect(request.getContextPath() + "/product/productDetail.jsp?productId=" + productId);
+                return;
+            }
+
+            Bid b = new Bid();
+            b.setProductId(productId);
+            b.setMemberId(loginUser.getMemberId());
+            b.setBidPrice(bidPrice);
+
+            int result1 = dao.insertBid(conn, b);
+            int result2 = dao.updateCurrentPrice(conn, productId, bidPrice);
+
+            if (result1 > 0 && result2 > 0) {
+                commit(conn);
+                session.setAttribute("alertMsg", "입찰 성공!");
+            } else {
+                rollback(conn);
+                session.setAttribute("alertMsg", "입찰 실패");
+            }
+
+            close(conn);
+            response.sendRedirect(request.getContextPath() + "/product/productDetail.jsp?productId=" + productId);
+        }
+    }
+
 }
