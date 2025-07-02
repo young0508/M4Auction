@@ -211,4 +211,16 @@ public class AdminDAO {
         }
         return result;
     }
+    
+    public int updateProductStatus(Connection conn, int productId, String status) {
+        String sql = "UPDATE PRODUCT SET STATUS = ? WHERE PRODUCT_ID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, productId);
+            return pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

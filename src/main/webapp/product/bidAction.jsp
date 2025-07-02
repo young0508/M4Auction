@@ -1,9 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.auction.vo.MemberDTO, com.auction.vo.ProductDTO, com.auction.vo.Bid" %>
+<%@ page import="com.auction.vo.MemberDTO, com.auction.vo.ProductDTO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="static com.auction.common.JDBCTemplate.*" %>
-
 <%
 MemberDTO loginUser = (MemberDTO)session.getAttribute("loginUser");
 if(loginUser == null){
@@ -12,13 +11,13 @@ if(loginUser == null){
 }
 
 int productId = Integer.parseInt(request.getParameter("productId"));
-int bidPrice = Integer.parseInt(request.getParameter("bidPrice"));
+long bidPrice = Long.parseLong(request.getParameter("bidPrice"));
 
 Connection conn = getConnection();
 ProductDAO dao = new ProductDAO();
 ProductDTO p = dao.selectProductById(conn, productId);
 
-// 상품이 존재하지 않으면 중단
+// 상품 존재 여부 확인
 if (p == null) {
     rollback(conn);
 %>
@@ -31,6 +30,7 @@ if (p == null) {
     return;
 }
 
+// 입찰가 유효성 확인
 if (bidPrice <= p.getCurrentPrice()) {
     rollback(conn);
 %>
@@ -43,24 +43,37 @@ if (bidPrice <= p.getCurrentPrice()) {
     return;
 }
 
-Bid b = new Bid();
-b.setProductId(productId);
-b.setMemberId(loginUser.getMemberId());
-b.setBidPrice(bidPrice);
-
-int result1 = dao.insertBid(conn, b);
-int result2 = dao.updateCurrentPrice(conn, productId, bidPrice);
-
-if(result1 > 0 && result2 > 0){
-    commit(conn);
+// 마일리지 보유 여부 확인
+if (bidPrice > loginUser.getMileage()) {
+    rollback(conn);
 %>
 <script>
-    alert("입찰 성공");
-    location.href = "productDetail.jsp?productId=<%= productId %>";
+    alert("보유 마일리지가 부족합니다.");
+    history.back();
 </script>
 <%
-} else {
-    rollback(conn);
+    close(conn);
+    return;
+}
+
+	//1) 현재가 업데이트
+   int resultPrice = dao.updateCurrentPrice(conn, productId, bidPrice);
+   // 2) 마일리지 차감
+   int resultMileage = dao.reduceMileage(conn, loginUser.getMemberId(), bidPrice);
+
+   if(resultPrice > 0 && resultMileage > 0) {
+     commit(conn);
+%>
+<script>
+ alert("입찰 성공");
+ location.href = "productDetail.jsp?productId=<%= productId %>";
+</script>
+<%
+       // 세션에 남은 마일리지 반영
+       loginUser.setMileage(loginUser.getMileage() - bidPrice);
+       session.setAttribute("loginUser", loginUser);
+ } else {
+     rollback(conn);
 %>
 <script>
     alert("입찰 실패");
@@ -70,3 +83,4 @@ if(result1 > 0 && result2 > 0){
 }
 close(conn);
 %>
+

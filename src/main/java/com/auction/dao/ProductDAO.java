@@ -313,13 +313,13 @@ public class ProductDAO {
 
 
     
-    public int updateCurrentPrice(Connection conn, int productId, int bidPrice) {
+    public int updateCurrentPrice(Connection conn, int productId, Long bidPrice) {
         int result = 0;
         PreparedStatement pstmt = null;
         String sql = "	UPDATE PRODUCT\r\n SET CURRENT_PRICE = ?\r\n WHERE PRODUCT_ID = ?";
         try {
             pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, bidPrice);
+            pstmt.setLong(1, bidPrice);
             pstmt.setInt(2, productId);
             result = pstmt.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); } 
@@ -534,7 +534,7 @@ public class ProductDAO {
             }
 
             int productId = Integer.parseInt(request.getParameter("productId"));
-            int bidPrice = Integer.parseInt(request.getParameter("bidPrice"));
+            long bidPrice = Long.parseLong(request.getParameter("bidPrice"));
 
             Connection conn = getConnection();
             ProductDAO dao = new ProductDAO();
@@ -547,15 +547,10 @@ public class ProductDAO {
                 return;
             }
 
-            Bid b = new Bid();
-            b.setProductId(productId);
-            b.setMemberId(loginUser.getMemberId());
-            b.setBidPrice(bidPrice);
+            int result = dao.updateCurrentPrice(conn, productId, bidPrice);
 
-            int result1 = dao.insertBid(conn, b);
-            int result2 = dao.updateCurrentPrice(conn, productId, bidPrice);
 
-            if (result1 > 0 && result2 > 0) {
+            if (result > 0) {
                 commit(conn);
                 session.setAttribute("alertMsg", "입찰 성공!");
             } else {
@@ -565,6 +560,17 @@ public class ProductDAO {
 
             close(conn);
             response.sendRedirect(request.getContextPath() + "/product/productDetail.jsp?productId=" + productId);
+        }
+    }
+    public int reduceMileage(Connection conn, String memberId, long amount) {
+        String sql = "UPDATE USERS SET MILEAGE = MILEAGE - ? WHERE MEMBER_ID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, amount);
+            pstmt.setString(2, memberId);
+            return pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
         }
     }
 

@@ -6,15 +6,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
+
 @WebServlet("/admin/chargeAction")
 public class AdminChargeServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. 파라미터 확인
         int reqId = Integer.parseInt(request.getParameter("reqId"));
         String action = request.getParameter("action");
-
-        System.out.println("[Servlet 호출됨] reqId = " + reqId + ", action = " + action);  // << 이거 꼭 추가
-
         Connection conn = getConnection();
         AdminDAO dao = new AdminDAO();
         int result = 0;
