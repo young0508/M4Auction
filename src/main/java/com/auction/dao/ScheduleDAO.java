@@ -1,14 +1,13 @@
 package com.auction.dao;
 
 import com.auction.vo.ScheduleDTO;
-import java.util.Date;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 import static com.auction.common.JDBCTemplate.*;
 
@@ -20,10 +19,9 @@ public class ScheduleDAO {
                      "VALUES (SCHEDULE_SEQ.NEXTVAL, ?, ?, ?, ?, SYSDATE, SYSDATE)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, dto.getProductId());
-            pstmt.setTimestamp(2, new Timestamp(dto.getStartTime().getTime()));
-            pstmt.setTimestamp(3, new Timestamp(dto.getEndTime().getTime()));
+            pstmt.setTimestamp(2, dto.getStartTime());
+            pstmt.setTimestamp(3, dto.getEndTime());
             pstmt.setString(4, dto.getStatus());
-
             return pstmt.executeUpdate();
         }
     }
@@ -34,11 +32,10 @@ public class ScheduleDAO {
                      "WHERE SCHEDULE_ID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, dto.getProductId());
-            pstmt.setTimestamp(2, new Timestamp(dto.getStartTime().getTime()));
-            pstmt.setTimestamp(3, new Timestamp(dto.getEndTime().getTime()));
+            pstmt.setTimestamp(2, dto.getStartTime());
+            pstmt.setTimestamp(3, dto.getEndTime());
             pstmt.setString(4, dto.getStatus());
             pstmt.setInt(5, dto.getScheduleId());
-
             return pstmt.executeUpdate();
         }
     }
@@ -60,15 +57,7 @@ public class ScheduleDAO {
             pstmt.setInt(1, scheduleId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    ScheduleDTO dto = new ScheduleDTO();
-                    dto.setScheduleId(rs.getInt("SCHEDULE_ID"));
-                    dto.setProductId(rs.getInt("PRODUCT_ID"));
-                    dto.setStartTime(rs.getTimestamp("START_TIME"));
-                    dto.setEndTime(rs.getTimestamp("END_TIME"));
-                    dto.setStatus(rs.getString("STATUS"));
-                    dto.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                    dto.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
-                    return dto;
+                    return mapRowToDto(rs);
                 }
             }
         }
@@ -84,15 +73,7 @@ public class ScheduleDAO {
             pstmt.setInt(1, productId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    ScheduleDTO dto = new ScheduleDTO();
-                    dto.setScheduleId(rs.getInt("SCHEDULE_ID"));
-                    dto.setProductId(rs.getInt("PRODUCT_ID"));
-                    dto.setStartTime(rs.getTimestamp("START_TIME"));
-                    dto.setEndTime(rs.getTimestamp("END_TIME"));
-                    dto.setStatus(rs.getString("STATUS"));
-                    dto.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                    dto.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
-                    list.add(dto);
+                    list.add(mapRowToDto(rs));
                 }
             }
         }
@@ -107,23 +88,27 @@ public class ScheduleDAO {
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
-                ScheduleDTO dto = new ScheduleDTO();
-                dto.setScheduleId(rs.getInt("SCHEDULE_ID"));
-                dto.setProductId(rs.getInt("PRODUCT_ID"));
-                dto.setStartTime(rs.getTimestamp("START_TIME"));
-                dto.setEndTime(rs.getTimestamp("END_TIME"));
-                dto.setStatus(rs.getString("STATUS"));
-                dto.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                dto.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
-                list.add(dto);
+                list.add(mapRowToDto(rs));
             }
         }
         return list;
     }
-    
- // ScheduleDAO.java
-    public String getScheduleStatus(Date startTime, Date endTime) {
-        Date now = new Date();
+
+    private ScheduleDTO mapRowToDto(ResultSet rs) throws SQLException {
+        ScheduleDTO dto = new ScheduleDTO();
+        dto.setScheduleId(rs.getInt("SCHEDULE_ID"));
+        dto.setProductId(rs.getInt("PRODUCT_ID"));
+        dto.setStartTime(rs.getTimestamp("START_TIME"));
+        dto.setEndTime(rs.getTimestamp("END_TIME"));
+        dto.setStatus(rs.getString("STATUS"));
+        dto.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+        dto.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
+        return dto;
+    }
+
+    /** 현재 스케줄 상태 계산 */
+    public String getScheduleStatus(Timestamp startTime, Timestamp endTime) {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
         if (now.before(startTime)) {
             return "대기중";
         } else if (now.after(endTime)) {
@@ -132,6 +117,4 @@ public class ScheduleDAO {
             return "진행중";
         }
     }
-
-
 }

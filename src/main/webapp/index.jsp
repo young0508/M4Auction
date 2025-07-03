@@ -150,7 +150,8 @@
 </style>
 </head>
 <body>
-<jsp:include page="/layout/header/header.jsp" />
+
+    <jsp:include page="/layout/header/header.jsp" />
 
 <%-- 알림 메시지가 있을 경우 alert 출력 --%>
 <% if (alertMsg != null) { %>
@@ -160,9 +161,8 @@
 <% session.removeAttribute("alertMsg"); %>
 <% } %>
 
-<header class="header">
-    <%-- 헤더 내부 내용 필요시 여기에 작성 --%>
-</header>
+
+
 
 <div class="content-wrapper">
     <!-- 메인 콘텐츠 영역 -->
@@ -287,7 +287,7 @@
 </div>
 
 <footer class="footer">
-    <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
+    <jsp:include page="/layout/footer/footer.jsp" />
 </footer>
 
  <script>

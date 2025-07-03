@@ -141,7 +141,6 @@
 
 
     <footer class="footer">
-        <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
     </footer>
 </body>
 </html>

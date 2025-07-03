@@ -6,12 +6,15 @@ import java.util.List;
 
 import com.auction.vo.AuctionDTO;
 
+
 public class AuctionDAO {
-	private Connection conn;
+	private final Connection conn;
+	public AuctionDAO(Connection conn) { this.conn = conn; }
 	private PreparedStatement pstmt;
 	private ResultSet rs;
+
+	public AuctionDAO() {this.conn = null;}// 상품 등록
 	
-	// 상품 등록
 	public void insertAuctionItem(String title, String description, int startPrice)
 		throws ClassNotFoundException, SQLException {
 		String sql = "insert into AUCTION_ITEM (ID, TITLE, DESCRIPTION, START_PRICE, CURRENT_PRICE) "

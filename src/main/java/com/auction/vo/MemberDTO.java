@@ -15,7 +15,7 @@ public class MemberDTO {
     private String birthdate;
     private String gender;
     private String mobileCarrier;
-    private int mileage; // 마일리지
+    private Long mileage; // 마일리지
     private String preferredCategory;  // 관심 분야
     private String annualBudget;       // 연간 예산
     private String vipNote;            // 특별 요청사항
@@ -60,8 +60,8 @@ public class MemberDTO {
     public void setMobileCarrier(String mobileCarrier) { this.mobileCarrier = mobileCarrier; }
     
     // ======== 새로 추가된 마일리지 Getter/Setter ========
-    public int getMileage() { return mileage; }
-    public void setMileage(int mileage) { this.mileage = mileage; }
+    public Long getMileage() {return mileage;}
+    public void setMileage(Long mileage) {this.mileage = mileage;}
     public String getZip() { return zip; }
     public void setZip(String zip) { this.zip = zip; }
 

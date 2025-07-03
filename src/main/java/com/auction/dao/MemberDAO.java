@@ -43,7 +43,7 @@ public class MemberDAO {
 	            loginUser.setBirthdate(rs.getString("BIRTHDATE"));
 	            loginUser.setGender(rs.getString("GENDER"));
 	            loginUser.setMobileCarrier(rs.getString("MOBILE_CARRIER"));
-	            loginUser.setMileage(rs.getInt("MILEAGE"));
+	            loginUser.setMileage(rs.getLong("MILEAGE"));
 	            loginUser.setZip(rs.getString("ZIP"));
 	            loginUser.setAddr1(rs.getString("ADDR1"));
 	            loginUser.setAddr2(rs.getString("ADDR2"));

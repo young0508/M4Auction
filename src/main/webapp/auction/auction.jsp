@@ -60,7 +60,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>상품 카드 그리드</title>
+    <title> 경매장 </title>
     <style>
       /* (스타일 코드는 변경사항 없음) */
       body { background-color: #f4f4f4; margin:0; font-family:'Noto Sans KR',sans-serif; }
@@ -121,7 +121,6 @@
     for (ScheduleDTO sched : scheduleList) {
         if (count++ >= 5) break;
 
-        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 오류 수정 및 로직 복원 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
         String status;
         String cls; // CSS 클래스 적용을 위한 변수
         if (now.before(sched.getStartTime())) {
@@ -134,7 +133,6 @@
             status = "종료";
             cls = "finished";
         }
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 오류 수정 및 로직 복원 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 %>
       <%-- status에 맞는 CSS 클래스(cls)를 적용하여 색상이 표시되도록 수정 --%>
       <li><span class="status <%=cls%>"><%=status%></span>
@@ -151,18 +149,25 @@
   </aside>
 
   <main class="main-container">
-    <h2 class="section-title">Now Bidding</h2>
-    <div class="product-grid">
-      <% if(productList.isEmpty()){ %>
-        <p>조회된 상품이 없습니다.</p>
-      <% } else {
-           for(ProductDTO p: productList){ %>
-            <% if (p.getEndTime().before(now)) { continue; } %>
+  <h2 class="section-title">Now Bidding</h2>
+  <div class="product-grid">
+    <%-- 상품 리스트가 비어 있으면 메시지 출력 --%>
+    <% if (productList.isEmpty()) { %>
+      <p>조회된 상품이 없습니다.</p>
+    <% } else { %>
+      <%-- 리스트를 순회하면서 STATUS='A' 이고 아직 종료되지 않은 상품만 렌더링 --%>
+      <% for (ProductDTO p : productList) { 
+           if (!"A".equals(p.getStatus()))       continue;
+           if (p.getEndTime().before(now))       continue;
+      %>
         <div class="product-card">
           <a href="<%=request.getContextPath()%>/product/productDetail.jsp?productId=<%=p.getProductId()%>">
-            <% boolean hasImg = p.getImageRenamedName()!=null; %>
-            <img src="<%= hasImg ? request.getContextPath()+"/resources/product_images/"+p.getImageRenamedName()
-                              :"https://placehold.co/600x400/ddd/333?text="+URLEncoder.encode(p.getProductName(),"UTF-8") %>" alt="<%=p.getProductName()%>">
+            <% boolean hasImg = p.getImageRenamedName() != null; %>
+            <img src="<%= hasImg 
+                        ? request.getContextPath()+"/resources/product_images/"+p.getImageRenamedName()
+                        : "https://placehold.co/600x400/ddd/333?text="+URLEncoder.encode(p.getProductName(),"UTF-8")
+                     %>"
+                 alt="<%=p.getProductName()%>">
             <div class="product-info">
               <h3><%=p.getProductName()%></h3>
               <p class="artist"><%=p.getArtistName()%></p>
@@ -172,9 +177,34 @@
             </div>
           </a>
         </div>
-      <% } } %>
-    </div>
-    </main>
+      <% } %>
+    <% } %>
+  </div>
+</main>
 </div>
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const timers = document.querySelectorAll('.timer');
+  timers.forEach(timer => {
+    const endTimeString = timer.dataset.endtime; // 여기에 JSP가 찍어낸 "2025-07-04T15:00:00" 같은 문자열이 담겨야 합니다
+    if (!endTimeString) return;                 // 비어 있다면 건너뛰고
+    const endTime = new Date(endTimeString).getTime();
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = endTime - now;
+      if (diff <= 0) {
+        clearInterval(interval);
+        timer.textContent = '경매 마감';
+        return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+      timer.textContent = (d>0? d+'일 ':'') + h+':'+m+':'+s;
+    }, 1000);
+  });
+});
+</script>
 </html>

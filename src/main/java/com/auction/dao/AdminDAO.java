@@ -27,9 +27,9 @@ public class AdminDAO {
         return 0;
     }
 
-    /** 승인 대기 상품 수 조회 (status = 'W') */
+    /** 승인 대기 상품 수 조회 (status = 'P') */
     public int selectPendingProducts(Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM product WHERE status = 'W'";
+        String sql = "SELECT COUNT(*) FROM product WHERE status = 'P'";
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery()
@@ -69,10 +69,10 @@ public class AdminDAO {
         return 0L;
     }
 
-    /** 승인 대기 중인 상품 목록 조회 (status = 'W') */
+    /** 승인 대기 중인 상품 목록 조회 (status = 'P') */
     public List<ProductDTO> selectPendingProductsList(Connection conn) throws SQLException {
         String sql = "SELECT product_id, product_name, start_price, image_renamed_name, seller_id "
-                   + "FROM product WHERE status = 'W' ORDER BY product_id DESC";
+                   + "FROM product WHERE status = 'P' ORDER BY product_id DESC";
         List<ProductDTO> list = new ArrayList<>();
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
