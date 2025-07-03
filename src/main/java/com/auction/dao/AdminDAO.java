@@ -15,7 +15,7 @@ public class AdminDAO {
 
     /** 전체 상품 수 조회 */
     public int selectTotalProducts(Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM tbl_product";
+        String sql = "SELECT COUNT(*) FROM product";
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery()
@@ -29,7 +29,7 @@ public class AdminDAO {
 
     /** 승인 대기 상품 수 조회 (status = 'W') */
     public int selectPendingProducts(Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM tbl_product WHERE status = 'W'";
+        String sql = "SELECT COUNT(*) FROM product WHERE status = 'W'";
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery()
@@ -57,7 +57,7 @@ public class AdminDAO {
 
     /** 총 낙찰 금액 합계 조회 (status = 'F') */
     public long selectTotalRevenue(Connection conn) throws SQLException {
-        String sql = "SELECT NVL(SUM(final_price), 0) FROM tbl_product WHERE status = 'F'";
+        String sql = "SELECT NVL(SUM(final_price), 0) FROM product WHERE status = 'F'";
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery()
@@ -72,7 +72,7 @@ public class AdminDAO {
     /** 승인 대기 중인 상품 목록 조회 (status = 'W') */
     public List<ProductDTO> selectPendingProductsList(Connection conn) throws SQLException {
         String sql = "SELECT product_id, product_name, start_price, image_renamed_name, seller_id "
-                   + "FROM tbl_product WHERE status = 'W' ORDER BY product_id DESC";
+                   + "FROM product WHERE status = 'W' ORDER BY product_id DESC";
         List<ProductDTO> list = new ArrayList<>();
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);

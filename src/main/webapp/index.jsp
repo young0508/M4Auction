@@ -2,10 +2,8 @@
   File: WebContent/index.jsp  
   역할: 페이징, 검색, 카테고리 기능이 적용된 최종 메인 페이지입니다. 
 --%>
-
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-
 <%@ page import="com.auction.vo.MemberDTO" %>
 <%@ page import="com.auction.vo.ProductDTO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
@@ -28,12 +26,8 @@
     String keyword = request.getParameter("keyword");
     String category = request.getParameter("category");
 
-    if (keyword == null) {
-        keyword = "";
-    }
-    if (category == null) {
-        category = "all";
-    }
+    if (keyword 	== null) 	{keyword="";}
+    if (category	== null)	{category="all";}
 
     // 페이징 관련 변수 초기화
     int listCount;
@@ -296,16 +290,41 @@
     <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
 </footer>
 
-<script>
-    // 타이머 표시 스크립트: 각 상품의 경매 종료 시간 카운트다운 처리
-    document.addEventListener('DOMContentLoaded', function() {
-        const timers = document.querySelectorAll('.timer');
-        timers.forEach(timer => {
-            const endTimeString = timer.dataset.endtime;
-            if(!endTimeString) return;
+ <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timers = document.querySelectorAll('.timer');
+            timers.forEach(timer => {
+                const endTimeString = timer.dataset.endtime;
+                if(!endTimeString) return;
 
-            const endTime = new Date(endTimeString).getTime();
+                const endTime = new Date(endTimeString).getTime();
 
-            const interval = setInterval(function() {
-                const now = new Date().getTime();
-               
+                const interval = setInterval(function() {
+                    const now = new Date().getTime();
+                    const distance = endTime - now;
+
+                    if (distance > 0) {
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                        
+                        let timerHTML = "";
+                        if(days > 0) timerHTML += days + "일 ";
+                        timerHTML += String(hours).padStart(2, '0') + ":" 
+                                   + String(minutes).padStart(2, '0') + ":" 
+                                   + String(seconds).padStart(2, '0');
+                        timer.innerHTML = timerHTML;
+                    } else {
+                        clearInterval(interval);
+                        timer.innerHTML = "경매 마감";
+                        timer.classList.add('ended');
+                    }
+                }, 1000);
+            });
+        });
+    </script>
+<jsp:include page="/layout/footer/footer.jsp" />
+
+</body>
+</html>
