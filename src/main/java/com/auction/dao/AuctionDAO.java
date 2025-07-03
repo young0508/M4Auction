@@ -15,7 +15,7 @@ public class AuctionDAO {
 	public void insertAuctionItem(String title, String description, int startPrice)
 		throws ClassNotFoundException, SQLException {
 		String sql = "insert into AUCTION_ITEM (ID, TITLE, DESCRIPTION, START_PRICE, CURRENT_PRICE) "
-				+ "values (AUCTION_ITEM_SEQ.NEXTVAL, ?, ?, ?, ?)";
+				+ "vlaues (AUCTION_ITEM_SEQ.NEXTVAL, ?, ?, ?, ?)";
 		pstmt = conn.prepareStatement(sql);
 		pstmt.setString(1,title);
 		pstmt.setString(2,description);

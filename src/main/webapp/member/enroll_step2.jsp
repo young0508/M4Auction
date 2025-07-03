@@ -68,7 +68,7 @@
         color: white;
         border-radius: 5px;
         cursor: pointer;
-        white-space: nowrap; /* 버튼 글자 줄바꿈 방지 */
+        white-space: nowrap;
     }
     .gender-group label {
         margin-right: 20px;
@@ -175,19 +175,52 @@
     </div>
 
     <script>
-        // 아이디 중복확인 (지금은 임시로 알림창만 띄웁니다)
+        // 중복확인 했는지 체크하는 변수
+        var isIdChecked = false;
+        
+        // 아이디 중복확인 함수
         function checkId(){
             const userId = document.getElementById('userId').value;
+            
             if(userId.length < 4){
                 alert('아이디는 4자 이상 입력해주세요.');
-            } else {
-                // 나중에 이 부분에서 DB와 통신하여 실제 중복 여부를 확인하는 로직이 필요합니다.
-                alert('사용 가능한 아이디입니다.');
+                return;
             }
+            
+            // AJAX로 중복 확인
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'checkId.jsp?userId=' + userId, true);
+            
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState == 4 && xhr.status == 200) {
+                    if(xhr.responseText.trim() === 'Y') {
+                        alert('사용 가능한 아이디입니다!');
+                        isIdChecked = true;
+                    } else {
+                        alert('이미 사용중인 아이디입니다.');
+                        isIdChecked = false;
+                        document.getElementById('userId').value = '';
+                        document.getElementById('userId').focus();
+                    }
+                }
+            };
+            
+            xhr.send();
         }
+        
+        // 아이디 입력칸이 바뀌면 다시 체크하도록
+        document.getElementById('userId').addEventListener('change', function() {
+            isIdChecked = false;
+        });
 
         // 폼 제출 전 유효성 검사
         function validateForm(){
+            // 아이디 중복확인 했는지 체크
+            if(!isIdChecked) {
+                alert('아이디 중복확인을 해주세요!');
+                return false;
+            }
+            
             const pwd = document.getElementById('userPwd').value;
             const pwdCheck = document.getElementById('userPwdCheck').value;
 
@@ -208,17 +241,17 @@
 
             return true;
         }
+        
         // 다음 주소검색
-		 function execDaumPostcode() {
-		    new daum.Postcode({
-		      oncomplete: function(data) {
-		        document.getElementById('zip').value = data.zonecode;
-		        document.getElementById('addr1').value = data.roadAddress;
-		        document.getElementById('addr2').focus();
-		      }
-		    }).open();
-		  }
-
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById('zip').value = data.zonecode;
+                    document.getElementById('addr1').value = data.roadAddress;
+                    document.getElementById('addr2').focus();
+                }
+            }).open();
+        }
     </script>
 </body>
 </html>

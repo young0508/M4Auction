@@ -15,21 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-<<<<<<< HEAD
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import com.auction.common.PageInfo;
 import com.auction.vo.Bid;
-import com.auction.vo.MemberDTO;
-=======
-import com.auction.common.PageInfo;
-import com.auction.vo.BidDTO;
->>>>>>> origin/dev
 import com.auction.vo.ProductDTO;
 
 public class ProductDAO {
@@ -298,33 +285,26 @@ public class ProductDAO {
     public int insertBid(Connection conn, Bid b) {
         int result = 0;
         PreparedStatement pstmt = null;
-        String sql = "INSERT INTO BID (BID_ID, PRODUCT_ID, BIDDER_ID, BID_PRICE, BID_TIME) VALUES (SEQ_BID_ID.NEXTVAL, ?, ?, ?, SYSDATE)";
-
+        String sql = "INSERT INTO BID (BID_ID, PRODUCT_ID, BIDDER_ID, BID_PRICE, BID_TIME)\r\n"
+        		+ "		VALUES (SEQ_BID_ID.NEXTVAL, ?, ?, ?, SYSDATE)";
         try {
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, b.getProductId());
-            pstmt.setString(2, b.getMemberId());
+            pstmt.setString(2, b.getBidderId());
             pstmt.setInt(3, b.getBidPrice());
             result = pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            close(pstmt);
-        }
+        } catch (SQLException e) { e.printStackTrace(); } 
+        finally { close(pstmt); }
         return result;
     }
-
-
-
-
     
-    public int updateCurrentPrice(Connection conn, int productId, Long bidPrice) {
+    public int updateCurrentPrice(Connection conn, int productId, int bidPrice) {
         int result = 0;
         PreparedStatement pstmt = null;
         String sql = "	UPDATE PRODUCT\r\n SET CURRENT_PRICE = ?\r\n WHERE PRODUCT_ID = ?";
         try {
             pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, bidPrice);
+            pstmt.setInt(1, bidPrice);
             pstmt.setInt(2, productId);
             result = pstmt.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); } 
@@ -422,8 +402,7 @@ public class ProductDAO {
     }
 
     public Bid findWinner(Connection conn, int productId) {
-    public BidDTO findWinner(Connection conn, int productId) {
-        BidDTO winner = null;
+        Bid winner = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         String sql = "SELECT *\r\n"
@@ -441,8 +420,8 @@ public class ProductDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                winner = new BidDTO();
-                winner.setMemberId(rs.getString("MEMBER_ID"));
+                winner = new Bid();
+                winner.setBidderId(rs.getString("BIDDER_ID"));
                 winner.setBidPrice(rs.getInt("BID_PRICE"));
             }
         } catch (SQLException e) {
@@ -526,57 +505,17 @@ public class ProductDAO {
         }
         return list;
     }
-    @WebServlet("/product/bid")
-    public class BidServlet extends HttpServlet {
-        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-            request.setCharacterEncoding("UTF-8");
-            HttpSession session = request.getSession();
-            MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
-
-            if (loginUser == null) {
-                response.sendRedirect(request.getContextPath() + "/member/loginForm.jsp");
-                return;
+    
+    // 가장 최근에 시퀀스로 생성된 PRODUCT_ID를 반환 (insert 직후에 호출해야 함)
+    public int selectLastInsertedProductId(Connection conn) throws SQLException {
+        String sql = "SELECT SEQ_PRODUCT_ID.CURRVAL FROM DUAL";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
             }
-
-            int productId = Integer.parseInt(request.getParameter("productId"));
-            long bidPrice = Long.parseLong(request.getParameter("bidPrice"));
-
-            Connection conn = getConnection();
-            ProductDAO dao = new ProductDAO();
-            int currentPrice = dao.selectProductById(conn, productId).getCurrentPrice();
-
-            if (bidPrice <= currentPrice) {
-                session.setAttribute("alertMsg", "입찰가는 현재가보다 높아야 합니다.");
-                close(conn);
-                response.sendRedirect(request.getContextPath() + "/product/productDetail.jsp?productId=" + productId);
-                return;
-            }
-
-            int result = dao.updateCurrentPrice(conn, productId, bidPrice);
-
-
-            if (result > 0) {
-                commit(conn);
-                session.setAttribute("alertMsg", "입찰 성공!");
-            } else {
-                rollback(conn);
-                session.setAttribute("alertMsg", "입찰 실패");
-            }
-
-            close(conn);
-            response.sendRedirect(request.getContextPath() + "/product/productDetail.jsp?productId=" + productId);
         }
+        return -1; // 실패 시 -1 반환
     }
-    public int reduceMileage(Connection conn, String memberId, long amount) {
-        String sql = "UPDATE USERS SET MILEAGE = MILEAGE - ? WHERE MEMBER_ID = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, amount);
-            pstmt.setString(2, memberId);
-            return pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
+    
 }

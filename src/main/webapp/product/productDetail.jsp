@@ -117,15 +117,14 @@
                             <button class="bid-button" disabled>경매 마감 (낙찰 처리중)</button>
                         <% } %>
                     <% } else { %> <%-- 1-2. 시간도 남았고, 정상 진행중 --%>
-                        <form action="<%= request.getContextPath() %>/product/bidAction.jsp" method="post">
-						    <!-- 이미 보여주는 입찰가 입력 필드 외에 -->
-						    <input type="hidden" name="productId"    value="<%= p.getProductId() %>" />
-						    <input type="hidden" name="currentPrice" value="<%= p.getCurrentPrice() %>" />
-						    
-						    <label>입찰가: </label>
-						    <input type="number" name="bidPrice" min="<%= p.getCurrentPrice()+1 %>" required />
-						    <button type="submit">입찰하기</button>
-						</form>
+                        <form id="bidForm" class="bid-form" action="bidAction.jsp" method="post" onsubmit="return validateBid();">
+                            <input type="hidden" name="productId" value="<%= p.getProductId() %>">
+                            <input type="hidden" name="currentPrice" value="<%= currentPrice %>">
+                            <div class="bid-input-group">
+                                <input type="number" name="bidPrice" id="bidPriceInput" placeholder="입찰 금액" required>
+                                <button type="submit" class="bid-button">입찰하기</button>
+                            </div>
+                        </form>
                         <% if(p.getBuyNowPrice() > 0 && !isSeller) { %>
                              <a href="paymentAction.jsp?productId=<%= p.getProductId() %>" class="bid-button buy-now" onclick="return confirm('즉시 구매가(<%= df.format(p.getBuyNowPrice()) %>원)로 구매하시겠습니까?');">즉시 구매</a>
                         <% } %>

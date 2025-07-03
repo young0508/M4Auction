@@ -110,32 +110,26 @@
 	        <% if (chargeList == null || chargeList.isEmpty()) { %>
 	            <p>현재 충전 대기 요청이 없습니다.</p>
 	        <% } else { %>
-			<% for (ChargeRequestDTO req : chargeList) {
-			     if ("W".equals(req.getStatus())) { %>   <%-- STATUS가 'W'인 경우만 출력 --%>
-			
-			    <div class="product-card">
-			        <div class="info">
-			            <h4>회원 ID: <%= req.getMemberId() %></h4>
-			            <p>충전 요청 금액: ₩ <%= dfAmt.format(req.getAmount()) %></p>
-			            <p>요청일: <%= req.getRequestDate() %></p>
-			        </div>
-			        <div class="actions">
-			            <form action="<%= request.getContextPath() %>/admin/chargeAction" method="post">
-			                <input type="hidden" name="reqId" value="<%= req.getReqId() %>">
-			                <input type="hidden" name="action" value="approve">
-			                <button type="submit">승인</button>
-			            </form>
-			
-			            <form action="<%= request.getContextPath() %>/admin/chargeAction" method="post" style="display: inline;">
-			                <input type="hidden" name="reqId" value="<%= req.getReqId() %>">
-			                <input type="hidden" name="action" value="reject">
-			                <button type="submit" class="reject-btn">거부</button>
-			            </form>
-			        </div>
-    				</div>
-
+	            <% for (ChargeRequestDTO req : chargeList) { %>
+	                <div class="product-card">
+	                    <div class="info">
+	                        <h4>회원 ID: <%= req.getMemberId() %></h4>
+	                        <p>충전 요청 금액: ₩ <%= dfAmt.format(req.getAmount()) %></p>
+	                        <p>요청일: <%= req.getRequestDate() %></p>
+	                    </div>
+	                    <div class="actions">
+	                        <a class="approve-btn"
+	                           href="<%= request.getContextPath() %>/admin/chargeAction?reqId=<%= req.getReqId() %>&action=approve">
+	                            승인
+	                        </a>
+	                        <a class="reject-btn"
+	                           href="<%= request.getContextPath() %>/admin/chargeAction?reqId=<%= req.getReqId() %>&action=reject">
+	                            거부
+	                        </a>
+	                    </div>
+	                </div>
 	            <% } %>
-	        <% }} %>
+	        <% } %>
 	    </div>
 	</section>
 

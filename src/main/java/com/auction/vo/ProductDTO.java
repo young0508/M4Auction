@@ -25,8 +25,17 @@ public class ProductDTO {
     private String status;
     private String winnerId;
     private int finalPrice;
+    private ScheduleDTO schedule;
 
-    public ProductDTO() {}
+    public ScheduleDTO getSchedule() {
+		return schedule;
+	}
+
+	public void setSchedule(ScheduleDTO schedule) {
+		this.schedule = schedule;
+	}
+
+	public ProductDTO() {}
     
 	// --- Getters and Setters ---
     

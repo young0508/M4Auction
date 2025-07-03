@@ -31,7 +31,7 @@
                 </form>
                 <div class="links">
                     <a href="enroll_step1.jsp">회원가입</a>
-                    <a href="#">아이디/비밀번호 찾기</a>
+                    <a href="findIdPwForm.jsp">아이디/비밀번호 찾기</a>
                 </div>
             </div>
         </main>

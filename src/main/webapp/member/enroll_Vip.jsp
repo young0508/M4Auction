@@ -169,6 +169,39 @@
 		        </div>
 		      </div>
 		    </div>
+		    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 30px;">
+    <h3 style="color: #d4af37; margin-bottom: 20px;">VIP 회원 전용 정보</h3>
+    
+    <div class="form-group">
+        <label for="preferredCategory">관심 작품 분야</label>
+        <select id="preferredCategory" name="preferredCategory">
+            <option value="painting">회화</option>
+            <option value="sculpture">조각</option>
+            <option value="photography">사진</option>
+            <option value="jewelry">보석/시계</option>
+            <option value="antique">골동품</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="annualBudget">연간 구매 예산</label>
+        <select id="annualBudget" name="annualBudget">
+            <option value="10000000">1천만원 이하</option>
+            <option value="50000000">5천만원 이하</option>
+            <option value="100000000">1억원 이하</option>
+            <option value="over">1억원 이상</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="vipNote">특별 요청사항</label>
+        <textarea id="vipNote" name="vipNote" 
+                  style="width: 100%; height: 100px; padding: 12px; 
+                         font-size: 16px; border: 1px solid #ccc; 
+                         border-radius: 5px; resize: none;"
+                  placeholder="VIP 서비스에 대한 특별한 요청사항을 입력해주세요."></textarea>
+    </div>
+</div>
             
             <button type="submit" class="submit-btn">가입하기</button>
         </form>
