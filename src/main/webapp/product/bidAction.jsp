@@ -3,7 +3,6 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="com.auction.vo.MemberDTO" %>
 <%@ page import="com.auction.vo.Bid" %>
-<%@ page import="com.auction.dao.MemberDAO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
 <%@ page import="static com.auction.common.JDBCTemplate.*" %>
 
@@ -19,10 +18,9 @@
     int productId    = Integer.parseInt(request.getParameter("productId"));
     int bidPrice     = Integer.parseInt(request.getParameter("bidPrice"));
     int currentPrice = Integer.parseInt(request.getParameter("currentPrice"));
-    Long mileage = loginUser.getMileage();
 
     // 3. 유효성 검증: 입찰가 > 현재가
-      if (bidPrice <= currentPrice || bidPrice > mileage) {
+    if (bidPrice <= currentPrice) {
 %>
 <script>
     alert("입찰가는 현재가보다 높아야 합니다.");
@@ -41,22 +39,12 @@
     // 5. 트랜잭션 처리
     Connection conn = getConnection();
     ProductDAO dao = new ProductDAO();
-    MemberDAO daom	= new MemberDAO();
-    int result1 = 0, result2 = 0, result3 = 0;
+    int result1 = 0, result2 = 0;
     try {
-        // 5-1) BID 테이블에 입찰 내역 저장
         result1 = dao.insertBid(conn, b);
-        // 5-2) PRODUCT 테이블의 현재가 갱신
         result2 = dao.updateCurrentPrice(conn, productId, bidPrice);
-        // 5-3) USERS 테이블의 마일리지 차감
-        result3 = daom.deductMileage(conn, loginUser.getMemberId(), bidPrice);
-
-        // 3가지 모두 성공해야 커밋
-        if (result1 > 0 && result2 > 0 && result3 > 0) {
+        if (result1 > 0 && result2 > 0) {
             commit(conn);
-            // 세션의 마일리지도 차감 후 업데이트
-            loginUser.setMileage(loginUser.getMileage() - bidPrice);
-            session.setAttribute("loginUser", loginUser);
         } else {
             rollback(conn);
         }
@@ -67,33 +55,7 @@
         close(conn);
     }
 %>
-<%
-    int productId = Integer.parseInt(request.getParameter("productId"));
-    int bidAmount = Integer.parseInt(request.getParameter("bidAmount"));
-    MemberDTO user = (MemberDTO) session.getAttribute("loginUser");
-    int memberId = user.getMemberId();
 
-    Connection conn = getConnection();
-    ProductDAO dao = new ProductDAO();
-    boolean ok = false;
-    try {
-        ok = dao.placeBid(conn, memberId, productId, bidAmount);
-        if(ok) commit(conn);
-        else      rollback(conn);
-    } catch(Exception e) {
-        rollback(conn);
-        e.printStackTrace();
-    } finally {
-        close(conn);
-    }
-
-    if(ok) {
-        session.setAttribute("alertMsg","입찰 성공!");
-    } else {
-        session.setAttribute("alertMsg","입찰 실패: 마일리지가 부족하거나 오류 발생");
-    }
-    response.sendRedirect("productDetail.jsp?productId=" + productId);
-%>
 <!DOCTYPE html>
 <html>
 <head>

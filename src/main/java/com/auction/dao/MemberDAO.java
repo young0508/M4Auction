@@ -29,8 +29,8 @@ public class MemberDAO {
 	    try {
 	        pstmt = conn.prepareStatement(sql);
 	        pstmt.setString(1, userId);
-	        //pstmt.setString(2, SHA256.encrypt(userPwd));
-	        pstmt.setString(2, userPwd);
+	        pstmt.setString(2, SHA256.encrypt(userPwd)); // 인코딩된 비번값을 불러온다.
+//	        pstmt.setString(2, userPwd);
 	        rs = pstmt.executeQuery();
 
 	        if (rs.next()) {
@@ -44,6 +44,8 @@ public class MemberDAO {
 	            loginUser.setGender(rs.getString("GENDER"));
 	            loginUser.setMobileCarrier(rs.getString("MOBILE_CARRIER"));
 	            loginUser.setMileage(rs.getLong("MILEAGE"));
+	            
+	            // ===== 주소 정보 추가 =====
 	            loginUser.setZip(rs.getString("ZIP"));
 	            loginUser.setAddr1(rs.getString("ADDR1"));
 	            loginUser.setAddr2(rs.getString("ADDR2"));

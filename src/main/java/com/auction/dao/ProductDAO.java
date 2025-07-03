@@ -92,43 +92,36 @@ public class ProductDAO {
         List<ProductDTO> list = new ArrayList<>();
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        String sql =
-            "SELECT * FROM (" +
-            "  SELECT ROWNUM RN, T.* FROM (" +
-            "    SELECT PRODUCT_ID, PRODUCT_NAME, ARTIST_NAME, PRODUCT_DESC," +
-            "           START_PRICE, BUY_NOW_PRICE, CURRENT_PRICE, END_TIME," +
-            "           IMAGE_ORIGINAL_NAME, IMAGE_RENAMED_NAME, CATEGORY, SELLER_ID," +
-            "           REG_DATE, STATUS" +
-            "      FROM PRODUCT" +
-            "     WHERE STATUS = 'A'" +
-            "       AND CATEGORY = ?" +
-            "     ORDER BY PRODUCT_ID DESC" +
-            "  ) T" +
-            ") WHERE RN BETWEEN ? AND ?";
+        String sql = "SELECT *\r\n"
+        		+ "FROM (\r\n"
+        		+ "SELECT ROWNUM AS RNUM, A.*\r\n"
+        		+ "FROM (\r\n"
+        		+ "SELECT\r\n"
+        		+ "P.PRODUCT_ID, P.PRODUCT_NAME, P.ARTIST_NAME, P.START_PRICE,\r\n"
+        		+ "P.CURRENT_PRICE, P.END_TIME, P.IMAGE_RENAMED_NAME\r\n"
+        		+ "FROM PRODUCT P\r\n"
+        		+ "WHERE P.STATUS = 'A'\r\n"
+        		+ "AND P.CATEGORY = ?\r\n"
+        		+ "ORDER BY P.END_TIME ASC\r\n"
+        		+ ") A\r\n"
+        		+ ")\r\n"
+        		+ "WHERE RNUM BETWEEN ? AND ?";
         try {
             pstmt = conn.prepareStatement(sql);
-            int start = (pi.getCurrentPage() - 1) * pi.getBoardLimit() + 1;
-            int end   = start + pi.getBoardLimit() - 1;
+            int startRow = (pi.getCurrentPage() - 1) * pi.getBoardLimit() + 1;
+            int endRow = startRow + pi.getBoardLimit() - 1;
             pstmt.setString(1, category);
-            pstmt.setInt(2, start);
-            pstmt.setInt(3, end);
+            pstmt.setInt(2, startRow);
+            pstmt.setInt(3, endRow);
             rs = pstmt.executeQuery();
             while (rs.next()) {
                 ProductDTO p = new ProductDTO();
-                p.setProductId(        rs.getInt("PRODUCT_ID"));
-                p.setProductName(      rs.getString("PRODUCT_NAME"));
-                p.setArtistName(       rs.getString("ARTIST_NAME"));
-                p.setProductDesc(      rs.getString("PRODUCT_DESC"));
-                p.setStartPrice(       rs.getInt("START_PRICE"));
-                p.setBuyNowPrice(      rs.getInt("BUY_NOW_PRICE"));
-                p.setCurrentPrice(     rs.getInt("CURRENT_PRICE"));
-                p.setEndTime(          rs.getTimestamp("END_TIME"));
-                p.setImageOriginalName(rs.getString("IMAGE_ORIGINAL_NAME"));
-                p.setImageRenamedName( rs.getString("IMAGE_RENAMED_NAME"));
-                p.setCategory(         rs.getString("CATEGORY"));
-                p.setSellerId(         rs.getString("SELLER_ID"));
-                p.setRegDate(          rs.getDate("REG_DATE"));
-                p.setStatus(           rs.getString("STATUS"));
+                p.setProductId(rs.getInt("PRODUCT_ID"));
+                p.setProductName(rs.getString("PRODUCT_NAME"));
+                p.setArtistName(rs.getString("ARTIST_NAME"));
+                p.setCurrentPrice(rs.getInt("CURRENT_PRICE"));
+                p.setImageRenamedName(rs.getString("IMAGE_RENAMED_NAME"));
+                p.setEndTime(rs.getTimestamp("END_TIME"));
                 list.add(p);
             }
         } catch (SQLException e) {
@@ -159,57 +152,45 @@ public class ProductDAO {
         return listCount;
     }
 
- // 2) 키워드 검색 페이지 처리
     public List<ProductDTO> searchProductList(Connection conn, String keyword, PageInfo pi) {
         List<ProductDTO> list = new ArrayList<>();
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        String sql =
-            "SELECT * FROM (" +
-            "  SELECT ROWNUM RN, T.* FROM (" +
-            "    SELECT PRODUCT_ID, PRODUCT_NAME, ARTIST_NAME, PRODUCT_DESC," +
-            "           START_PRICE, BUY_NOW_PRICE, CURRENT_PRICE, END_TIME," +
-            "           IMAGE_ORIGINAL_NAME, IMAGE_RENAMED_NAME, CATEGORY, SELLER_ID," +
-            "           REG_DATE, STATUS" +
-            "      FROM PRODUCT" +
-            "     WHERE STATUS = 'A'" +
-            "       AND (PRODUCT_NAME LIKE ? OR ARTIST_NAME LIKE ?)" +
-            "     ORDER BY PRODUCT_ID DESC" +
-            "  ) T" +
-            ") WHERE RN BETWEEN ? AND ?";
+        String sql = "SELECT *\r\n"
+        		+ "FROM (\r\n"
+        		+ "SELECT ROWNUM AS RNUM, A.*\r\n"
+        		+ "FROM (\r\n"
+        		+ "SELECT\r\n"
+        		+ "P.PRODUCT_ID, P.PRODUCT_NAME, P.ARTIST_NAME, P.START_PRICE,\r\n"
+        		+ "P.CURRENT_PRICE, P.END_TIME, P.IMAGE_RENAMED_NAME\r\n"
+        		+ "FROM PRODUCT P\r\n"
+        		+ "WHERE P.STATUS = 'A'\r\n"
+        		+ "AND (P.PRODUCT_NAME LIKE ? OR P.ARTIST_NAME LIKE ?)\r\n"
+        		+ "ORDER BY P.END_TIME ASC\r\n"
+        		+ ") A\r\n"
+        		+ ")\r\n"
+        		+ "WHERE RNUM BETWEEN ? AND ?";
         try {
             pstmt = conn.prepareStatement(sql);
-            int start = (pi.getCurrentPage() - 1) * pi.getBoardLimit() + 1;
-            int end   = start + pi.getBoardLimit() - 1;
+            int startRow = (pi.getCurrentPage() - 1) * pi.getBoardLimit() + 1;
+            int endRow = startRow + pi.getBoardLimit() - 1;
             pstmt.setString(1, "%" + keyword + "%");
             pstmt.setString(2, "%" + keyword + "%");
-            pstmt.setInt(3, start);
-            pstmt.setInt(4, end);
+            pstmt.setInt(3, startRow);
+            pstmt.setInt(4, endRow);
             rs = pstmt.executeQuery();
             while (rs.next()) {
                 ProductDTO p = new ProductDTO();
-                p.setProductId(        rs.getInt("PRODUCT_ID"));
-                p.setProductName(      rs.getString("PRODUCT_NAME"));
-                p.setArtistName(       rs.getString("ARTIST_NAME"));
-                p.setProductDesc(      rs.getString("PRODUCT_DESC"));
-                p.setStartPrice(       rs.getInt("START_PRICE"));
-                p.setBuyNowPrice(      rs.getInt("BUY_NOW_PRICE"));
-                p.setCurrentPrice(     rs.getInt("CURRENT_PRICE"));
-                p.setEndTime(          rs.getTimestamp("END_TIME"));
-                p.setImageOriginalName(rs.getString("IMAGE_ORIGINAL_NAME"));
-                p.setImageRenamedName( rs.getString("IMAGE_RENAMED_NAME"));
-                p.setCategory(         rs.getString("CATEGORY"));
-                p.setSellerId(         rs.getString("SELLER_ID"));
-                p.setRegDate(          rs.getDate("REG_DATE"));
-                p.setStatus(           rs.getString("STATUS"));
+                p.setProductId(rs.getInt("PRODUCT_ID"));
+                p.setProductName(rs.getString("PRODUCT_NAME"));
+                p.setArtistName(rs.getString("ARTIST_NAME"));
+                p.setCurrentPrice(rs.getInt("CURRENT_PRICE"));
+                p.setImageRenamedName(rs.getString("IMAGE_RENAMED_NAME"));
+                p.setEndTime(rs.getTimestamp("END_TIME"));
                 list.add(p);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            close(rs);
-            close(pstmt);
-        }
+        } catch (SQLException e) { e.printStackTrace(); } 
+        finally { close(rs); close(pstmt); }
         return list;
     }
 
@@ -233,49 +214,39 @@ public class ProductDAO {
         List<ProductDTO> list = new ArrayList<>();
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        String sql =
-            "SELECT * FROM (" +
-            "  SELECT ROWNUM RN, T.* FROM (" +
-            "    SELECT PRODUCT_ID, PRODUCT_NAME, ARTIST_NAME, PRODUCT_DESC," +
-            "           START_PRICE, BUY_NOW_PRICE, CURRENT_PRICE, END_TIME," +
-            "           IMAGE_ORIGINAL_NAME, IMAGE_RENAMED_NAME, CATEGORY, SELLER_ID," +
-            "           REG_DATE, STATUS" +
-            "      FROM PRODUCT" +
-            "     WHERE STATUS = 'A'" +
-            "     ORDER BY PRODUCT_ID DESC" +
-            "  ) T" +
-            ") WHERE RN BETWEEN ? AND ?";
+        String sql = "SELECT *\r\n"
+        		+ "FROM (\r\n"
+        		+ "SELECT ROWNUM AS RNUM, A.*\r\n"
+        		+ "FROM (\r\n"
+        		+ "SELECT\r\n"
+        		+ "P.PRODUCT_ID, P.PRODUCT_NAME, P.ARTIST_NAME, P.START_PRICE,\r\n"
+        		+ "P.CURRENT_PRICE, P.END_TIME, P.IMAGE_RENAMED_NAME\r\n"
+        		+ "FROM PRODUCT P\r\n"
+        		+ "WHERE P.STATUS = 'A'\r\n"
+        		+ "ORDER BY P.END_TIME ASC\r\n"
+        		+ ") A\r\n"
+        		+ ")\r\n"
+        		+ "WHERE RNUM BETWEEN ? AND ?";
         try {
             pstmt = conn.prepareStatement(sql);
-            int start = (pi.getCurrentPage() - 1) * pi.getBoardLimit() + 1;
-            int end   = start + pi.getBoardLimit() - 1;
-            pstmt.setInt(1, start);
-            pstmt.setInt(2, end);
+            int startRow = (pi.getCurrentPage() - 1) * pi.getBoardLimit() + 1;
+            int endRow = startRow + pi.getBoardLimit() - 1;
+            pstmt.setInt(1, startRow);
+            pstmt.setInt(2, endRow);
             rs = pstmt.executeQuery();
             while (rs.next()) {
                 ProductDTO p = new ProductDTO();
-                p.setProductId(        rs.getInt("PRODUCT_ID"));
-                p.setProductName(      rs.getString("PRODUCT_NAME"));
-                p.setArtistName(       rs.getString("ARTIST_NAME"));
-                p.setProductDesc(      rs.getString("PRODUCT_DESC"));
-                p.setStartPrice(       rs.getInt("START_PRICE"));
-                p.setBuyNowPrice(      rs.getInt("BUY_NOW_PRICE"));
-                p.setCurrentPrice(     rs.getInt("CURRENT_PRICE"));
-                p.setEndTime(          rs.getTimestamp("END_TIME"));
-                p.setImageOriginalName(rs.getString("IMAGE_ORIGINAL_NAME"));
-                p.setImageRenamedName( rs.getString("IMAGE_RENAMED_NAME"));
-                p.setCategory(         rs.getString("CATEGORY"));
-                p.setSellerId(         rs.getString("SELLER_ID"));
-                p.setRegDate(          rs.getDate("REG_DATE"));
-                p.setStatus(           rs.getString("STATUS"));
+                p.setProductId(rs.getInt("PRODUCT_ID"));
+                p.setProductName(rs.getString("PRODUCT_NAME"));
+                p.setArtistName(rs.getString("ARTIST_NAME"));
+                p.setStartPrice(rs.getInt("START_PRICE"));
+                p.setCurrentPrice(rs.getInt("CURRENT_PRICE"));
+                p.setEndTime(rs.getTimestamp("END_TIME"));
+                p.setImageRenamedName(rs.getString("IMAGE_RENAMED_NAME"));
                 list.add(p);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            close(rs);
-            close(pstmt);
-        }
+        } catch (SQLException e) { e.printStackTrace(); } 
+        finally { close(rs); close(pstmt); }
         return list;
     }
 
@@ -353,7 +324,7 @@ public class ProductDAO {
         		+ "			SEQ_PRODUCT_ID.NEXTVAL, ?, ?, ?,\r\n"
         		+ "			?, ?, 0, ?,\r\n"
         		+ "			?, ?, ?, ?, \r\n"
-        		+ "			SYSDATE, 'P'\r\n"
+        		+ "			SYSDATE, 'A'\r\n"
         		+ "		)";
         try {
             pstmt = conn.prepareStatement(sql);
@@ -546,41 +517,30 @@ public class ProductDAO {
         }
         return -1; // 실패 시 -1 반환
     }
-    /** 1) 입찰 처리: 마일리지 차감 + BID 테이블 저장 */
-    public boolean placeBid(Connection conn, int memberId, int productId, int bidAmount) throws SQLException {
-        MemberDAO mDao = new MemberDAO();
-        BidDAO bDao       = new BidDAO();   // 기존에 BidDAO가 없으면 ProductDAO 내부에 삽입해도 무방
-        // 1. 마일리지 차감
-        int updated = mDao.updateMileage(conn, memberId, -bidAmount);
-        if (updated != 1) return false;
+    
+ // ProductDAO.java
 
-        // 2. BID 테이블에 저장
-        int inserted = bDao.insertBid(conn, memberId, productId, bidAmount);
-        return inserted == 1;
-    }
-    /** 2) 경매 마감 처리: 낙찰 + 환불 + 스케줄 상태 변경 */
-    public void closeAuction(Connection conn, int productId, int scheduleId) throws SQLException {
-        BidDAO bDao       = new BidDAO();
-        ScheduleDAO sDao  = new ScheduleDAO();
-        MemberDAO mDao    = new MemberDAO();
+    //최근 낙찰이 된 경매 물품 리시트 출력
+    public List<ProductDTO> selectRecentWins(Connection conn) throws SQLException {
+        List<ProductDTO> list = new ArrayList<>();
+        String sql = "SELECT * FROM PRODUCT WHERE STATUS = 'E' AND WINNER_ID IS NOT NULL ORDER BY REG_DATE DESC";
 
-        // 1) 최고 입찰자 가져오기
-        BidDTO winner = bDao.selectHighestBid(conn, productId);
-        if (winner != null) {
-            // 낙찰 처리
-            bDao.markSuccessful(conn, winner.getBidId());
-
-            // 2) 나머지 입찰자들 환불
-            List<BidDTO> losers = bDao.selectLosingBids(conn, productId);
-            for (BidDTO loser : losers) {
-                mDao.updateMileage(conn, loser.getMemberId(), loser.getBidAmount());
-                bDao.markRefunded(conn, loser.getBidId());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                ProductDTO dto = new ProductDTO();
+                dto.setProductId(rs.getInt("PRODUCT_ID"));
+                dto.setProductName(rs.getString("PRODUCT_NAME"));
+                dto.setArtistName(rs.getString("ARTIST_NAME"));
+                dto.setFinalPrice(rs.getInt("FINAL_PRICE"));
+                dto.setWinnerId(rs.getString("WINNER_ID"));
+                dto.setImageRenamedName(rs.getString("IMAGE_RENAMED_NAME"));
+                list.add(dto);
             }
         }
 
-        // 3) SCHEDULE 상태 “종료됨”으로 변경
-        sDao.updateScheduleStatus(conn, scheduleId, "종료됨");
+        return list;
     }
-}
+
     
 }

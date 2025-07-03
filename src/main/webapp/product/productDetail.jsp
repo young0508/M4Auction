@@ -1,63 +1,46 @@
+<%--
+  File: WebContent/product/productDetail.jsp
+  역할: 즉시 구매 기능이 포함된 최종 버전의 상품 상세 페이지입니다.
+--%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="com.auction.vo.MemberDTO" %>
 <%@ page import="com.auction.vo.ProductDTO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
 <%@ page import="java.sql.Connection" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.text.DecimalFormat" %>
 <%@ page import="static com.auction.common.JDBCTemplate.*" %>
 <%
-    // 페이지 렌더링 전에 만료된 경매가 있으면 닫아버리기
-    Connection conn2 = getConnection();
-    ScheduleDAO sd = new ScheduleDAO();
-    ProductDAO pd = new ProductDAO();
-    List<ScheduleDTO> all = sd.selectAllSchedules(conn2);
-    for(ScheduleDTO s : all) {
-        if ( now.after(s.getEndTime()) && !"종료됨".equals(s.getStatus()) ) {
-            pd.closeAuction(conn2, s.getProductId(), s.getScheduleId());
-        }
-    }
-    commit(conn2);
-    close(conn2);
-%>
-<%
-    // 1) 로그인 유저, 파라미터, 상품 조회
-    MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
-    String productIdStr = request.getParameter("productId");
-    int productId = productIdStr != null ? Integer.parseInt(productIdStr) : 0;
+    MemberDTO loginUser = (MemberDTO)session.getAttribute("loginUser");
 
+    String productIdStr = request.getParameter("productId");
+    int productId = 0;
+    if(productIdStr != null) {
+        productId = Integer.parseInt(productIdStr);
+    }
+    
     ProductDTO p = null;
-    if (productId > 0) {
+    if(productId > 0){
         Connection conn = getConnection();
         p = new ProductDAO().selectProductById(conn, productId);
         close(conn);
     }
+    
+    boolean isEnded = p != null && new java.util.Date().after(p.getEndTime());
+    boolean isSeller = loginUser != null && p != null && loginUser.getMemberId().equals(p.getSellerId());
+    boolean isWinner = loginUser != null && p != null && p.getWinnerId() != null && loginUser.getMemberId().equals(p.getWinnerId());
 
-    // 2) 상품이 없거나 상태가 'A'가 아닐 경우 즉시 경고 후 뒤로
-    if (p == null || !"A".equals(p.getStatus())) {
-%>
-<script>
-    alert("현재 진행중인 경매가 아닙니다.");
-    history.back();
-</script>
-<%
-        return;
-    }
-
-    // 3) 이후에만 변수를 계산
-    boolean isEnded  = new java.util.Date().after(p.getEndTime());
-    boolean isSeller = loginUser != null && loginUser.getMemberId().equals(p.getSellerId());
-    boolean isWinner = loginUser != null && p.getWinnerId() != null && loginUser.getMemberId().equals(p.getWinnerId());
-
-    java.text.DecimalFormat df = new java.text.DecimalFormat("###,###,###");
-    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy년 MM월 dd일 HH:mm");
-    int currentPrice = p.getCurrentPrice() == 0 ? p.getStartPrice() : p.getCurrentPrice();
-    Long mileage      = loginUser != null ? loginUser.getMileage() : 0;
+    DecimalFormat df = new DecimalFormat("###,###,###");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm");
+    
+    int currentPrice = (p != null) ? (p.getCurrentPrice() == 0 ? p.getStartPrice() : p.getCurrentPrice()) : 0;
 %>
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Art Auction - 작품 상세</title>
+<meta charset="UTF-8">
+<title>Art Auction - 작품 상세</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -93,99 +76,113 @@
 </style>
 </head>
 <body>
-    <%
-    // … (p 조회 직후)
-    // 1) 상품이 없거나 상태가 'A'가 아니면 경고 후 이전 페이지로
-    if (p == null || ! "A".equals(p.getStatus())) {
-%>
-<script>
-    alert("현재 진행중인 경매가 아닙니다.");
-    history.back();
-</script>
-<%
-        return;
-    }
-%>
-    <header>
-    <jsp:include page="/layout/header/header.jsp" />
-    </head>
-  <div class="detail-container">
-    <!-- 이미지 섹션 생략 -->
-    <div class="product-details-section">
-      <p class="artist-name"><%= p.getArtistName() %></p>
-      <h1 class="product-title"><%= p.getProductName() %></h1>
+    <header class="header">
+        <div class="logo"><a href="<%= request.getContextPath() %>/index.jsp">Art Auction</a></div>
+        <nav class="nav">
+            <% if(loginUser == null) { %>
+                <a href="<%= request.getContextPath() %>/member/loginForm.jsp">로그인</a>
+                <a href="<%= request.getContextPath() %>/member/enroll_step1.jsp">회원가입</a>
+            <% } else { %>
+                <span><%= loginUser.getMemberName() %>님 환영합니다.</span>
+                <a href="<%= request.getContextPath() %>/product/productEnrollForm.jsp">상품등록</a>
+                <a href="<%= request.getContextPath() %>/mypage/myPage.jsp">마이페이지</a>
+                <a href="<%= request.getContextPath() %>/member/logout.jsp">로그아웃</a>
+            <% } %>
+        </nav>
+    </header>
 
-      <div class="bid-actions">
-        <div class="price-info">
-          <span class="label">현재가</span>
-          <p class="price">₩ <%= df.format(currentPrice) %></p>
-        </div>
-
-        <% if (isEnded) { %>
-          <% if (isSeller) { %>
-            <a href="processWinnerAction.jsp?productId=<%= p.getProductId() %>" class="bid-button">낙찰 처리하기</a>
-          <% } else { %>
-            <button class="bid-button" disabled>경매 마감 (낙찰 처리중)</button>
-          <% } %>
-        <% } else { %>
-          <form id="bidForm" action="bidAction.jsp" method="post" onsubmit="return validateBid();">
-            <input type="hidden" name="productId"    value="<%= p.getProductId() %>">
-            <input type="hidden" name="currentPrice" value="<%= currentPrice %>">
-            <div class="bid-input-group">
-              <input type="number" name="bidPrice" id="bidPriceInput" placeholder="입찰 금액" required>
-              <button type="submit" class="bid-button">입찰하기</button>
+    <% if(p != null) { %>
+        <div class="detail-container">
+            <div class="product-image-section">
+                 <% if(p.getImageRenamedName() != null) { %>
+                    <img src="<%= request.getContextPath() %>/resources/product_images/<%= p.getImageRenamedName() %>" alt="<%= p.getProductName() %>">
+                <% } else { %>
+                    <img src="https://placehold.co/800x800/2b2b2b/e0e0e0?text=<%= p.getProductName() %>" alt="<%= p.getProductName() %>">
+                <% } %>
             </div>
-          </form>
-          <% if (p.getBuyNowPrice() > 0 && !isSeller) { %>
-            <a href="paymentAction.jsp?productId=<%= p.getProductId() %>"
-               class="bid-button buy-now"
-               onclick="return confirm('즉시 구매가(<%= df.format(p.getBuyNowPrice()) %>원)로 구매하시겠습니까?');">
-              즉시 구매
-            </a>
-          <% } %>
-        <% } %>
-      </div>
+            <div class="product-details-section">
+                <p class="artist-name"><%= p.getArtistName() %></p>
+                <h1 class="product-title"><%= p.getProductName() %></h1>
+                
+                <div class="bid-actions">
+                <% if(p.getStatus().equals("A")) { %> <%-- 1. 경매가 아직 진행중일 때 --%>
+                    <div class="price-info">
+                        <span class="label">현재가</span>
+                        <p class="price">₩ <%= df.format(currentPrice) %></p>
+                    </div>
+                    <% if(isEnded) { %> <%-- 1-1. 시간은 마감됐지만, 아직 낙찰 처리 전 --%>
+                        <% if(isSeller) { %>
+                            <a href="processWinnerAction.jsp?productId=<%= p.getProductId() %>" class="bid-button">낙찰 처리하기</a>
+                        <% } else { %>
+                            <button class="bid-button" disabled>경매 마감 (낙찰 처리중)</button>
+                        <% } %>
+                    <% } else { %> <%-- 1-2. 시간도 남았고, 정상 진행중 --%>
+                        <form id="bidForm" class="bid-form" action="bidAction.jsp" method="post" onsubmit="return validateBid();">
+                            <input type="hidden" name="productId" value="<%= p.getProductId() %>">
+                            <input type="hidden" name="currentPrice" value="<%= currentPrice %>">
+                            <div class="bid-input-group">
+                                <input type="number" name="bidPrice" id="bidPriceInput" placeholder="입찰 금액" required>
+                                <button type="submit" class="bid-button">입찰하기</button>
+                            </div>
+                        </form>
+                        <% if(p.getBuyNowPrice() > 0 && !isSeller) { %>
+                             <a href="paymentAction.jsp?productId=<%= p.getProductId() %>" class="bid-button buy-now" onclick="return confirm('즉시 구매가(<%= df.format(p.getBuyNowPrice()) %>원)로 구매하시겠습니까?');">즉시 구매</a>
+                        <% } %>
+                    <% } %>
+                <% } else if(p.getStatus().equals("E")) { %> <%-- 2. 경매가 종료되었을 때 --%>
+                    <div class="price-info">
+                        <span class="label">최종 낙찰가</span>
+                        <p class="price">₩ <%= df.format(p.getFinalPrice()) %></p>
+                    </div>
+                    <% if(isWinner) { %>
+                        <a href="paymentAction.jsp?productId=<%= p.getProductId() %>" class="bid-button" onclick="return confirm('보유 마일리지에서 낙찰가만큼 차감하여 결제하시겠습니까?');">결제하기 (마일리지 차감)</a>
+                    <% } else { %>
+                         <button class="bid-button" disabled>경매 종료</button>
+                    <% } %>
+                <% } else if(p.getStatus().equals("P")) { %> <%-- 수정된 부분: 결제 완료 상태('P')일 때의 UI --%>
+                    <div class="price-info">
+                        <span class="label">최종 낙찰가</span>
+                        <p class="price">₩ <%= df.format(p.getFinalPrice()) %></p>
+                    </div>
+                    <button class="bid-button" disabled>결제 완료</button>
+                <% } else { %> <%-- 3. 그 외 (취소 등) --%>
+                    <button class="bid-button" disabled>종료된 경매입니다</button>
+                <% } %>
+                </div>
 
-      <p class="description"><%= p.getProductDesc() %></p>
-      <div class="product-meta">
-        <p>판매자: <%= p.getSellerId() %></p>
-        <p>경매 마감: <%= sdf.format(p.getEndTime()) %></p>
-        <% if (p.getWinnerId() != null) { 
-        	%>
-          <p style="color:#d4af37; font-weight:bold;">낙찰자: <%= p.getWinnerId() %></p>
-        <% } %>
-      </div>
-    </div>
-  </div>
+                <p class="description"><%= p.getProductDesc() %></p>
+                <div class="product-meta">
+                    <p>판매자: <%= p.getSellerId() %></p>
+                    <p>경매 마감: <%= sdf.format(p.getEndTime()) %></p>
+                    <% if(p.getWinnerId() != null) { %>
+                        <p style="color:#d4af37; font-weight:bold;">낙찰자: <%= p.getWinnerId() %></p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <h1 style="text-align:center; margin-top:100px;">해당 상품을 찾을 수 없습니다.</h1>
+    <% } %>
+    <footer class="footer">
+        <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
+    </footer>
+    <script>
+        function validateBid() { 
+            const bidPrice = parseInt(document.getElementById('bidPriceInput').value);
+            const currentPrice = <%= currentPrice %>;
 
-  <footer class="footer">
-    <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
-  </footer>
+            if (isNaN(bidPrice) || bidPrice <= 0) {
+                alert("올바른 입찰 금액을 입력해주세요.");
+                return false;
+            }
+            
+            if (bidPrice <= currentPrice) {
+                alert("입찰가는 현재가보다 높아야 합니다.");
+                return false;
+            }
 
-  <script>
-    function validateBid() {
-      const bidPrice     = parseInt(document.getElementById('bidPriceInput').value, 10);
-      const currentPrice = <%= currentPrice %>;
-      const myMoney      = <%= mileage %>;
-
-      if (isNaN(bidPrice) || bidPrice <= 0) {
-        alert("올바른 입찰 금액을 입력해주세요.");
-        return false;
-      }
-      if (bidPrice > myMoney) {
-        alert("입찰가는 현재 마일리지를 초과할 수 없습니다.");
-        return false;
-      }
-      if (bidPrice <= currentPrice) {
-        alert("입찰가는 현재가보다 높아야 합니다.");
-        return false;
-      }
-      if (bidPrice > currentPrice * 5) {
-        alert("입찰가는 현재가의 500%를 초과할 수 없습니다.");
-        return false;
-      }
-      return true;
-    }
-  </script>
+            return true;
+        }
+    </script>
 </body>
 </html>

@@ -2,8 +2,10 @@
   File: WebContent/index.jsp  
   역할: 페이징, 검색, 카테고리 기능이 적용된 최종 메인 페이지입니다. 
 --%>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+
 <%@ page import="com.auction.vo.MemberDTO" %>
 <%@ page import="com.auction.vo.ProductDTO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
@@ -26,8 +28,12 @@
     String keyword = request.getParameter("keyword");
     String category = request.getParameter("category");
 
-    if (keyword 	== null) 	{keyword="";}
-    if (category	== null)	{category="all";}
+    if (keyword == null) {
+        keyword = "";
+    }
+    if (category == null) {
+        category = "all";
+    }
 
     // 페이징 관련 변수 초기화
     int listCount;
@@ -150,8 +156,7 @@
 </style>
 </head>
 <body>
-
-    <jsp:include page="/layout/header/header.jsp" />
+<jsp:include page="/layout/header/header.jsp" />
 
 <%-- 알림 메시지가 있을 경우 alert 출력 --%>
 <% if (alertMsg != null) { %>
@@ -161,8 +166,9 @@
 <% session.removeAttribute("alertMsg"); %>
 <% } %>
 
-
-
+<header class="header">
+    <%-- 헤더 내부 내용 필요시 여기에 작성 --%>
+</header>
 
 <div class="content-wrapper">
     <!-- 메인 콘텐츠 영역 -->
@@ -287,7 +293,7 @@
 </div>
 
 <footer class="footer">
-    <jsp:include page="/layout/footer/footer.jsp" />
+    <p>&copy; 2025 Art Auction. All Rights Reserved.</p>
 </footer>
 
  <script>

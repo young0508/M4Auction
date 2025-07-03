@@ -27,9 +27,9 @@ public class AdminDAO {
         return 0;
     }
 
-    /** 승인 대기 상품 수 조회 (status = 'P') */
+    /** 승인 대기 상품 수 조회 (status = 'W') */
     public int selectPendingProducts(Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM product WHERE status = 'P'";
+        String sql = "SELECT COUNT(*) FROM product WHERE status = 'W'";
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery()
@@ -69,10 +69,10 @@ public class AdminDAO {
         return 0L;
     }
 
-    /** 승인 대기 중인 상품 목록 조회 (status = 'P') */
+    /** 승인 대기 중인 상품 목록 조회 (status = 'W') */
     public List<ProductDTO> selectPendingProductsList(Connection conn) throws SQLException {
         String sql = "SELECT product_id, product_name, start_price, image_renamed_name, seller_id "
-                   + "FROM product WHERE status = 'P' ORDER BY product_id DESC";
+                   + "FROM product WHERE status = 'W' ORDER BY product_id DESC";
         List<ProductDTO> list = new ArrayList<>();
         try (
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -156,7 +156,7 @@ public class AdminDAO {
         return list;
     }
 
-
+    //충전 승인
     public int approveCharge(Connection conn, int reqId) {
         int result = 0;
         try (PreparedStatement ps1 = conn.prepareStatement(
@@ -186,7 +186,8 @@ public class AdminDAO {
         }
         return result;
     }
-
+    
+    //충전 거부
     public int rejectCharge(Connection conn, int reqId) {
         int result = 0;
         String sql = "UPDATE CHARGE_REQUEST SET STATUS = 'R', APPROVE_DATE = SYSDATE WHERE REQ_ID = ? AND STATUS = 'W'";
