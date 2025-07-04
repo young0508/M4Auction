@@ -192,5 +192,31 @@ public class MemberDAO {
 	        
 	        return result;
 	    }
-	  
+	  public int insertVipInfo(Connection conn, MemberDTO m) {
+		    int result = 0;
+		    PreparedStatement pstmt = null;
+		    
+		    String sql = "INSERT INTO VIP_INFO (MEMBER_ID, PREFERRED_CATEGORY, ANNUAL_BUDGET, VIP_NOTE) "
+		                + "VALUES (?, ?, ?, ?)";
+		    
+		    try {
+		        pstmt = conn.prepareStatement(sql);
+		        pstmt.setString(1, m.getMemberId());
+		        pstmt.setString(2, m.getPreferredCategory());
+		        pstmt.setString(3, m.getAnnualBudget());
+		        pstmt.setString(4, m.getVipNote());
+		        
+		        result = pstmt.executeUpdate();
+		        
+		        System.out.println("VIP INSERT 실행 결과: " + result);
+		        
+		    } catch(SQLException e) {
+		        System.out.println("VIP 저장 중 에러 발생!");
+		        e.printStackTrace();
+		    } finally {
+		        close(pstmt);
+		    }
+		    
+		    return result;
+		}
 }
