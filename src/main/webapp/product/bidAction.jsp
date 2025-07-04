@@ -2,7 +2,7 @@
          pageEncoding="UTF-8" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="com.auction.vo.MemberDTO" %>
-<%@ page import="com.auction.vo.Bid" %>
+<%@ page import="com.auction.vo.BidDTO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
 <%@ page import="static com.auction.common.JDBCTemplate.*" %>
 
@@ -31,8 +31,8 @@
     }
 
     // 4. Bid 객체에 정보 세팅
-    Bid b = new Bid();
-    b.setProductId(productId);                      // 상품 ID
+    BidDTO b = new BidDTO();
+    b.setItemId(productId); 
     b.setBidderId(loginUser.getMemberId());           // MemberDTO의 사용자 아이디
     b.setBidPrice(bidPrice);
 

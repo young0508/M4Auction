@@ -65,15 +65,7 @@
 </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo"><a href="<%= request.getContextPath() %>/index.jsp">Art Auction</a></div>
-        <div class="nav">
-            <span><%= loginUser.getMemberName() %>님</span>
-            <a href="<%= request.getContextPath() %>/product/productEnrollForm.jsp">상품등록</a>
-            <a href="<%= request.getContextPath() %>/mypage/myPage.jsp">마이페이지</a>
-            <a href="<%= request.getContextPath() %>/member/logout.jsp">로그아웃</a>
-        </div>
-    </header>
+    <jsp:include page="/layout/header/header.jsp" />
 
     <div class="mypage-container">
         <h2 class="section-title">내 정보</h2>

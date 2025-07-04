@@ -1,3 +1,4 @@
+
 package com.auction.vo;
 
 import java.sql.Date;

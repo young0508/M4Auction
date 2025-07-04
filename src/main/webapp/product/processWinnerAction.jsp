@@ -7,7 +7,7 @@
 
 <%@ page import="com.auction.vo.MemberDTO" %>
 <%@ page import="com.auction.vo.ProductDTO" %>
-<%@ page import="com.auction.vo.Bid" %>
+<%@ page import="com.auction.vo.BidDTO" %>
 <%@ page import="com.auction.dao.ProductDAO" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="static com.auction.common.JDBCTemplate.*" %>
@@ -36,7 +36,7 @@
     }
 
     // 2. 최고 입찰자 정보 조회
-    Bid winner = pDao.findWinner(conn, productId);
+    BidDTO winner = pDao.findWinner(conn, productId);
 
     if(winner != null) { // 3. 입찰자가 있는 경우 (정상적인 낙찰 처리)
         

@@ -12,8 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
- 
 
+import com.auction.vo.BidDTO;
 import com.auction.vo.MemberDTO;
 
 public class MemberDAO {
@@ -29,8 +29,8 @@ public class MemberDAO {
 	    try {
 	        pstmt = conn.prepareStatement(sql);
 	        pstmt.setString(1, userId);
-	        pstmt.setString(2, SHA256.encrypt(userPwd)); // 인코딩된 비번값을 불러온다.
-//	        pstmt.setString(2, userPwd);
+//	        pstmt.setString(2, SHA256.encrypt(userPwd)); // 인코딩된 비번값을 불러온다.
+	        pstmt.setString(2, userPwd);
 	        rs = pstmt.executeQuery();
 
 	        if (rs.next()) {
@@ -161,27 +161,13 @@ public class MemberDAO {
 	      return result;
 	  }
 
-	  public int updateMileage(Connection conn, String userId, int amount) {
-	        int result = 0;
-	        PreparedStatement pstmt = null;
-	        String sql = "UPDATE USERS\r\n"
-	        		+ "		   SET MILEAGE = MILEAGE + ?\r\n"
-	        		+ "		 WHERE MEMBER_ID = ?";
-	        
-	        try {
-	            pstmt = conn.prepareStatement(sql);
-	            pstmt.setInt(1, amount);
-	            pstmt.setString(2, userId);
-	            
-	            result = pstmt.executeUpdate();
-	            
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        } finally {
-	            close(pstmt);
+	  public int updateMileage(Connection conn, int memberId, int delta) throws SQLException {
+	        String sql = "UPDATE MEMBER SET MILEAGE = MILEAGE + ? WHERE MEMBER_ID = ?";
+	        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+	            pstmt.setInt(1, delta);
+	            pstmt.setInt(2, memberId);
+	            return pstmt.executeUpdate();
 	        }
-	        
-	        return result;
 	    }
     
 	  public int deductMileage(Connection conn, String userId, int amount) {
@@ -207,31 +193,4 @@ public class MemberDAO {
 	        return result;
 	    }
 	  
-	  public int insertVipInfo(Connection conn, MemberDTO m) {
-		    int result = 0;
-		    PreparedStatement pstmt = null;
-		    
-		    String sql = "INSERT INTO VIP_INFO (MEMBER_ID, PREFERRED_CATEGORY, ANNUAL_BUDGET, VIP_NOTE) "
-		                + "VALUES (?, ?, ?, ?)";
-		    
-		    try {
-		        pstmt = conn.prepareStatement(sql);
-		        pstmt.setString(1, m.getMemberId());
-		        pstmt.setString(2, m.getPreferredCategory());
-		        pstmt.setString(3, m.getAnnualBudget());
-		        pstmt.setString(4, m.getVipNote());
-		        
-		        result = pstmt.executeUpdate();
-		        
-		        System.out.println("VIP INSERT 실행 결과: " + result);
-		        
-		    } catch(SQLException e) {
-		        System.out.println("VIP 저장 중 에러 발생!");
-		        e.printStackTrace();
-		    } finally {
-		        close(pstmt);
-		    }
-		    
-		    return result;
-		}
-	}
+}
