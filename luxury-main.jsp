@@ -2,19 +2,6 @@
 <%@ page import="java.util.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.text.DecimalFormat" %>
-
-<%@ page import="com.auction.vo.MemberDTO" %>
-<%@ page import="com.auction.vo.ProductDTO" %>
-<%@ page import="com.auction.dao.ProductDAO" %>
-<%@ page import="com.auction.common.PageInfo" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.sql.Connection" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="static com.auction.common.JDBCTemplate.*" %>
-<%@ page import="com.auction.dao.ScheduleDAO" %>
-<%@ page import="com.auction.vo.ScheduleDTO" %>
 <%
     String sid = (String) session.getAttribute("sid");
     String ctx = request.getContextPath();
@@ -45,7 +32,7 @@
 </head>
 <body>
     <!-- Header -->
-    <jsp:include page="/views/luxury-header.jsp" />
+    <jsp:include page="/layout/header/luxury-header.jsp" />
     
     <!-- Main Hero Section -->
     <section class="main-hero">
@@ -139,22 +126,22 @@
     <section class="quick-links">
         <div class="container">
             <div class="links-grid">
-                <a href="#" class="link-item">
-                    <i class="fas fa-gavel"></i>
-                    <span>Live Auction</span>
-                </a>
-                <a href="#" class="link-item">
-                    <i class="fas fa-laptop"></i>
-                    <span>Online Auction</span>
-                </a>
-                <a href="#" class="link-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Auction Schedule</span>
-                </a>
-                <a href="#" class="link-item">
-                    <i class="fas fa-user-circle"></i>
-                    <span>My Page</span>
-                </a>
+                <a href="<%=ctx%>/auction/auction.jsp" class="link-item">
+   					 <i class="fas fa-gavel"></i>
+    				 <span>Live Auction</span>
+				</a>
+				<a href="<%=ctx%>/auction/auction.jsp" class="link-item">
+    				 <i class="fas fa-laptop"></i>
+    				 <span>Online Auction</span>
+				</a>
+				<a href="<%=ctx%>/auction/schedule.jsp" class="link-item">
+    				 <i class="fas fa-calendar-alt"></i>
+    				 <span>Auction Schedule</span>
+				</a>
+				<a href="<%=ctx%>/mypage/myPage.jsp" class="link-item">
+    				 <i class="fas fa-user-circle"></i>
+    				 <span>My Page</span>
+				</a>
             </div>
         </div>
     </section>
@@ -547,7 +534,7 @@
     </section>
     
     <!-- Footer -->
-    <jsp:include page="/views/luxury-footer.jsp" />
+    <jsp:include page="/layout/footer/luxury-footer.jsp" />
     
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
